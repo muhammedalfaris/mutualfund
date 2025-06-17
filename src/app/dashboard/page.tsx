@@ -211,7 +211,7 @@ export default function Dashboard() {
             Welcome back, John
           </h2>
           <p style={{ color: 'var(--color-muted-foreground)' }}>
-            Here's your portfolio performance overview
+            Here&apos;s your portfolio performance overview
           </p>
         </div>
 
@@ -268,7 +268,7 @@ export default function Dashboard() {
                     </div>
 
                     <div className="flex justify-between">
-                      <span className="text-sm opacity-90">Today's Change</span>
+                      <span className="text-sm opacity-90">Today&apos;s Change</span>
                       <span className={`text-sm font-medium ${
                         portfolioData.todaysGainLoss >= 0 ? 'text-green-300' : 'text-red-300'
                       }`}>
