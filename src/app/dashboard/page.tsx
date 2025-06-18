@@ -28,12 +28,12 @@ export default function Dashboard() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const portfolioData: PortfolioData = {
-    totalInvestment: 125000,
-    currentValue: 148250,
-    totalGainLoss: 23250,
+    totalInvestment: 10375000,
+    currentValue: 12304750,
+    totalGainLoss: 1929750,
     gainLossPercentage: 18.6,
-    todaysGainLoss: 1250,
-    availableBalance: 12500,
+    todaysGainLoss: 103750,
+    availableBalance: 1037500,
   };
 
   const userData: UserData = {
@@ -54,9 +54,9 @@ export default function Dashboard() {
   ];
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'INR',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount);
@@ -211,7 +211,7 @@ export default function Dashboard() {
             Welcome back, John
           </h2>
           <p style={{ color: 'var(--color-muted-foreground)' }}>
-            Here&apos;s your portfolio performance overview
+            Here's your portfolio performance overview
           </p>
         </div>
 
@@ -268,7 +268,7 @@ export default function Dashboard() {
                     </div>
 
                     <div className="flex justify-between">
-                      <span className="text-sm opacity-90">Today&apos;s Change</span>
+                      <span className="text-sm opacity-90">Today's Change</span>
                       <span className={`text-sm font-medium ${
                         portfolioData.todaysGainLoss >= 0 ? 'text-green-300' : 'text-red-300'
                       }`}>

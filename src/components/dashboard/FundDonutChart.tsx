@@ -10,17 +10,17 @@ interface FundData {
 }
 
 const FundDonutChart = () => {
-  const { } = useTheme();
+  const { currentTheme } = useTheme();
   const [hoveredFund, setHoveredFund] = useState<number | null>(null);
   const [animatedPercentages, setAnimatedPercentages] = useState<number[]>([]);
 
   const fundData: FundData[] = [
-    { name: 'Large Cap Equity', percentage: 35, amount: 51875, color: '#3b82f6', category: 'equity' },
-    { name: 'Mid Cap Growth', percentage: 25, amount: 37062, color: '#10b981', category: 'equity' },
-    { name: 'Debt Funds', percentage: 20, amount: 29650, color: '#f59e0b', category: 'debt' },
-    { name: 'Small Cap', percentage: 12, amount: 17790, color: '#ef4444', category: 'equity' },
-    { name: 'Gold ETF', percentage: 5, amount: 7412, color: '#8b5cf6', category: 'commodity' },
-    { name: 'Hybrid Balanced', percentage: 3, amount: 4446, color: '#06b6d4', category: 'hybrid' },
+    { name: 'Large Cap Equity', percentage: 35, amount: 4305625, color: '#3b82f6', category: 'equity' },
+    { name: 'Mid Cap Growth', percentage: 25, amount: 3076146, color: '#10b981', category: 'equity' },
+    { name: 'Debt Funds', percentage: 20, amount: 2460950, color: '#f59e0b', category: 'debt' },
+    { name: 'Small Cap', percentage: 12, amount: 1476570, color: '#ef4444', category: 'equity' },
+    { name: 'Gold ETF', percentage: 5, amount: 615196, color: '#8b5cf6', category: 'commodity' },
+    { name: 'Hybrid Balanced', percentage: 3, amount: 369018, color: '#06b6d4', category: 'hybrid' },
   ];
 
   const totalAmount = fundData.reduce((sum, fund) => sum + fund.amount, 0);
@@ -34,7 +34,7 @@ const FundDonutChart = () => {
   }, []);
 
   // Calculate SVG path for donut segments
-  const createDonutPath = (percentage: number, startAngle: number, radius: number = 90, ) => {
+  const createDonutPath = (percentage: number, startAngle: number, radius: number = 90, strokeWidth: number = 30) => {
     const angle = (percentage / 100) * 360;
     const endAngle = startAngle + angle;
     
@@ -52,9 +52,9 @@ const FundDonutChart = () => {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'INR',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount);

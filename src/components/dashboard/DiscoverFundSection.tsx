@@ -26,7 +26,7 @@ interface FundData {
 }
 
 const DiscoverFunds = () => {
-  const { } = useTheme();
+  const { currentTheme } = useTheme();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedRisk, setSelectedRisk] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('rating');
@@ -43,8 +43,8 @@ const DiscoverFunds = () => {
       nav: 45.67,
       returns: { '1Y': 18.5, '3Y': 15.2, '5Y': 12.8 },
       riskLevel: 'High',
-      minInvestment: 5000,
-      aum: 45000,
+      minInvestment: 415000,
+      aum: 3735000,
       expenseRatio: 1.8,
       rating: 4.5,
       manager: 'Shreyash Devalkar',
@@ -60,8 +60,8 @@ const DiscoverFunds = () => {
       nav: 23.45,
       returns: { '1Y': 8.2, '3Y': 7.8, '5Y': 8.5 },
       riskLevel: 'Low',
-      minInvestment: 1000,
-      aum: 12500,
+      minInvestment: 83000,
+      aum: 1037500,
       expenseRatio: 0.9,
       rating: 4.2,
       manager: 'Rahul Goswami',
@@ -77,8 +77,8 @@ const DiscoverFunds = () => {
       nav: 56.78,
       returns: { '1Y': 12.3, '3Y': 9.8, '5Y': 8.9 },
       riskLevel: 'Moderate',
-      minInvestment: 2000,
-      aum: 8500,
+      minInvestment: 166000,
+      aum: 705500,
       expenseRatio: 0.5,
       rating: 4.0,
       manager: 'Nitesh Jain',
@@ -94,8 +94,8 @@ const DiscoverFunds = () => {
       nav: 34.12,
       returns: { '1Y': 14.7, '3Y': 12.5, '5Y': 11.2 },
       riskLevel: 'Moderate',
-      minInvestment: 3000,
-      aum: 18900,
+      minInvestment: 249000,
+      aum: 1568700,
       expenseRatio: 1.4,
       rating: 4.3,
       manager: 'Neelesh Surana',
@@ -111,8 +111,8 @@ const DiscoverFunds = () => {
       nav: 78.90,
       returns: { '1Y': 16.8, '3Y': 13.5, '5Y': 11.8 },
       riskLevel: 'High',
-      minInvestment: 1000,
-      aum: 25600,
+      minInvestment: 83000,
+      aum: 2124800,
       expenseRatio: 0.2,
       rating: 4.1,
       manager: 'Sharwan Kumar Goyal',
@@ -128,8 +128,8 @@ const DiscoverFunds = () => {
       nav: 67.45,
       returns: { '1Y': 17.2, '3Y': 14.8, '5Y': 12.5 },
       riskLevel: 'High',
-      minInvestment: 5000,
-      aum: 38200,
+      minInvestment: 415000,
+      aum: 3170600,
       expenseRatio: 1.9,
       rating: 4.4,
       manager: 'Anuj Dawar',
@@ -186,19 +186,23 @@ const DiscoverFunds = () => {
   });
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'INR',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount);
   };
 
   const formatAUM = (amount: number) => {
-    if (amount >= 1000) {
-      return `₹${(amount / 1000).toFixed(1)}K Cr`;
+    if (amount >= 100000000) {
+      return `₹${(amount / 100000000).toFixed(1)} Cr`;
+    } else if (amount >= 10000000) {
+      return `₹${(amount / 10000000).toFixed(1)} Cr`;
+    } else if (amount >= 100000) {
+      return `₹${(amount / 100000).toFixed(1)} L`;
     }
-    return `₹${amount} Cr`;
+    return `₹${amount.toLocaleString('en-IN')}`;
   };
 
   const getRiskColor = (risk: string) => {
