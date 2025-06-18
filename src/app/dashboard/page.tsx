@@ -53,6 +53,15 @@ export default function Dashboard() {
     { name: 'Settings', active: false },
   ];
 
+  const quickAccessItems = [
+    { name: 'Invest', icon: '💰', color: 'var(--color-success)' },
+    { name: 'Withdraw', icon: '🏦', color: 'var(--color-warning)' },
+    { name: 'Transfer', icon: '🔄', color: 'var(--color-primary)' },
+    { name: 'Reports', icon: '📊', color: 'var(--color-secondary)' },
+    { name: 'History', icon: '📋', color: 'var(--color-accent)' },
+    { name: 'Support', icon: '🎧', color: 'var(--color-info)' },
+  ];
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
@@ -347,33 +356,101 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          {[
-            { name: 'Invest', icon: '💰', color: 'var(--color-success)' },
-            { name: 'Withdraw', icon: '🏦', color: 'var(--color-warning)' },
-            { name: 'Transfer', icon: '🔄', color: 'var(--color-primary)' },
-            { name: 'Reports', icon: '📊', color: 'var(--color-secondary)' },
-          ].map((action) => (
-            <button
-              key={action.name}
-              className="p-4 rounded-xl border hover:shadow-lg transition-all duration-200 hover:scale-105"
-              style={{
-                backgroundColor: 'var(--color-muted)',
-                borderColor: 'var(--color-border)',
-              }}
-            >
-              <div className="text-center">
-                <div className="w-12 h-12 mx-auto mb-2 rounded-full flex items-center justify-center"
-                     style={{ backgroundColor: action.color, opacity: 0.5 }}>
-                  <span className="text-2xl">{action.icon}</span>
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold" style={{ color: 'var(--color-foreground)' }}>
+              Quick Access
+            </h3>
+            <p className="text-sm md:hidden" style={{ color: 'var(--color-muted-foreground)' }}>
+              Swipe for more
+            </p>
+          </div>
+          
+          {/* Desktop Grid Layout */}
+          <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {quickAccessItems.slice(0, 4).map((action) => (
+              <button
+                key={action.name}
+                className="flex flex-col items-center p-4 rounded-xl border hover:shadow-md transition-all duration-200 hover:scale-105 active:scale-95"
+                style={{
+                  backgroundColor: 'var(--color-muted)',
+                  borderColor: 'var(--color-border)',
+                }}
+              >
+                <div 
+                  className="w-12 h-12 mb-3 rounded-full flex items-center justify-center"
+                  style={{ 
+                    backgroundColor: action.color, 
+                    opacity: 0.6 
+                  }}
+                >
+                  <div 
+                    className="w-7 h-7 rounded-full flex items-center justify-center"
+                    style={{ 
+                      backgroundColor: action.color,
+                      opacity: 0.8
+                    }}
+                  >
+                    <span className="text-base">{action.icon}</span>
+                  </div>
                 </div>
-                <p className="text-sm font-medium" style={{ color: 'var(--color-foreground)' }}>
+                <p 
+                  className="text-sm font-medium text-center"
+                  style={{ color: 'var(--color-foreground)' }}
+                >
                   {action.name}
                 </p>
+              </button>
+            ))}
+          </div>
+
+          {/* Mobile Horizontal Scroll Layout */}
+          <div className="relative md:hidden">
+            <div className="overflow-x-auto scrollbar-hide">
+              <div className="flex space-x-4 pb-2" style={{ minWidth: 'fit-content' }}>
+                {quickAccessItems.map((action) => (
+                  <button
+                    key={action.name}
+                    className="flex-shrink-0 flex flex-col items-center p-3 rounded-xl border hover:shadow-md transition-all duration-200 hover:scale-105 active:scale-95 min-w-[80px]"
+                    style={{
+                      backgroundColor: 'var(--color-muted)',
+                      borderColor: 'var(--color-border)',
+                    }}
+                  >
+                    <div 
+                      className="w-10 h-10 mb-2 rounded-full flex items-center justify-center"
+                      style={{ 
+                        backgroundColor: action.color, 
+                        opacity: 0.6 
+                      }}
+                    >
+                      <div 
+                        className="w-6 h-6 rounded-full flex items-center justify-center"
+                        style={{ 
+                          backgroundColor: action.color,
+                          opacity: 0.8
+                        }}
+                      >
+                        <span className="text-sm">{action.icon}</span>
+                      </div>
+                    </div>
+                    <p 
+                      className="text-xs font-medium text-center leading-tight"
+                      style={{ color: 'var(--color-foreground)' }}
+                    >
+                      {action.name}
+                    </p>
+                  </button>
+                ))}
               </div>
-            </button>
-          ))}
+            </div>
+            {/* Scroll indicator
+            <div className="absolute top-1/2 right-0 transform -translate-y-1/2 bg-gradient-to-l from-white/80 to-transparent w-8 h-full pointer-events-none md:hidden"
+                 style={{ background: `linear-gradient(to left, var(--color-background) 0%, transparent 100%)` }}>
+            </div> */}
+          </div>
         </div>
+
         <div className="mb-8">
           <FundDonutChart />
         </div>
@@ -381,6 +458,22 @@ export default function Dashboard() {
           <DiscoverFunds />
         </div>
       </main>
+
+      <style jsx>{`
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .backface-hidden {
+          backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+          transform: rotateY(180deg);
+        }
+      `}</style>
     </div>
   );
 }

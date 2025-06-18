@@ -7,6 +7,7 @@ interface FundData {
   amount: number;
   color: string;
   category: 'equity' | 'debt' | 'hybrid' | 'commodity';
+  logo: string;
 }
 
 const FundDonutChart = () => {
@@ -15,12 +16,12 @@ const FundDonutChart = () => {
   const [animatedPercentages, setAnimatedPercentages] = useState<number[]>([]);
 
   const fundData: FundData[] = [
-    { name: 'Large Cap Equity', percentage: 35, amount: 4305625, color: '#3b82f6', category: 'equity' },
-    { name: 'Mid Cap Growth', percentage: 25, amount: 3076146, color: '#10b981', category: 'equity' },
-    { name: 'Debt Funds', percentage: 20, amount: 2460950, color: '#f59e0b', category: 'debt' },
-    { name: 'Small Cap', percentage: 12, amount: 1476570, color: '#ef4444', category: 'equity' },
-    { name: 'Gold ETF', percentage: 5, amount: 615196, color: '#8b5cf6', category: 'commodity' },
-    { name: 'Hybrid Balanced', percentage: 3, amount: 369018, color: '#06b6d4', category: 'hybrid' },
+    { name: 'Large Cap Equity', percentage: 35, amount: 4305625, color: '#3b82f6', category: 'equity', logo: 'https://via.placeholder.com/16x16/3b82f6/ffffff?text=LC' },
+    { name: 'Mid Cap Growth', percentage: 25, amount: 3076146, color: '#10b981', category: 'equity', logo: 'https://via.placeholder.com/16x16/10b981/ffffff?text=MC' },
+    { name: 'Debt Funds', percentage: 20, amount: 2460950, color: '#f59e0b', category: 'debt', logo: 'https://via.placeholder.com/16x16/f59e0b/ffffff?text=DF' },
+    { name: 'Small Cap', percentage: 12, amount: 1476570, color: '#ef4444', category: 'equity', logo: 'https://via.placeholder.com/16x16/ef4444/ffffff?text=SC' },
+    { name: 'Gold ETF', percentage: 5, amount: 615196, color: '#8b5cf6', category: 'commodity', logo: 'https://via.placeholder.com/16x16/8b5cf6/ffffff?text=GE' },
+    { name: 'Hybrid Balanced', percentage: 3, amount: 369018, color: '#06b6d4', category: 'hybrid', logo: 'https://via.placeholder.com/16x16/06b6d4/ffffff?text=HB' },
   ];
 
   const totalAmount = fundData.reduce((sum, fund) => sum + fund.amount, 0);
@@ -165,9 +166,10 @@ const FundDonutChart = () => {
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div 
-                    className="w-4 h-4 rounded-full shadow-sm"
-                    style={{ backgroundColor: fund.color }}
+                  <img 
+                    src={fund.logo}
+                    alt={`${fund.name} logo`}
+                    className="w-5 h-5 rounded-full shadow-sm"
                   />
                   <div>
                     <p className="font-medium text-sm" style={{ color: 'var(--color-foreground)' }}>
