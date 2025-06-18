@@ -11,7 +11,7 @@ interface FundData {
 }
 
 const FundDonutChart = () => {
-  const { currentTheme } = useTheme();
+  const { } = useTheme();
   const [hoveredFund, setHoveredFund] = useState<number | null>(null);
   const [animatedPercentages, setAnimatedPercentages] = useState<number[]>([]);
 
@@ -35,7 +35,7 @@ const FundDonutChart = () => {
   }, []);
 
   // Calculate SVG path for donut segments
-  const createDonutPath = (percentage: number, startAngle: number, radius: number = 90, strokeWidth: number = 30) => {
+  const createDonutPath = (percentage: number, startAngle: number, radius: number = 90, ) => {
     const angle = (percentage / 100) * 360;
     const endAngle = startAngle + angle;
     

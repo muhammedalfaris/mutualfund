@@ -26,7 +26,7 @@ interface FundData {
 }
 
 const DiscoverFunds = () => {
-  const { currentTheme } = useTheme();
+  const { } = useTheme();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedRisk, setSelectedRisk] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('rating');
