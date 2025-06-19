@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '@/context/ThemeContext';
+import { useRouter } from 'next/navigation';
 
 interface FundData {
   id: string;
@@ -33,6 +34,7 @@ const DiscoverFunds = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [hoveredFund, setHoveredFund] = useState<string | null>(null);
   const [animatedCards, setAnimatedCards] = useState<string[]>([]);
+  const router = useRouter();
 
   const fundsData: FundData[] = [
     {
@@ -392,6 +394,7 @@ const DiscoverFunds = () => {
             }}
             onMouseEnter={() => setHoveredFund(fund.id)}
             onMouseLeave={() => setHoveredFund(null)}
+            onClick={() => router.push(`/fund/${fund.id}`)}
           >
             {/* Fund Header */}
             <div className="flex items-start justify-between mb-4">
@@ -534,6 +537,7 @@ const DiscoverFunds = () => {
                   borderColor: 'var(--color-primary)',
                   color: 'var(--color-primary)',
                 }}
+                onClick={e => { e.stopPropagation(); router.push(`/fund/${fund.id}`); }}
               >
                 <span className="text-sm font-medium">View Details</span>
               </button>
