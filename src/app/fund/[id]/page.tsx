@@ -5,6 +5,8 @@ import { useTheme } from '@/context/ThemeContext';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 
+type ChartPoint = { date: string; value: number };
+
 // Enhanced fund data with additional fields from reference
 const fund = {
   id: '1',
@@ -144,7 +146,7 @@ export default function FundDetailPage() {
   const [selectedDuration, setSelectedDuration] = useState('1Y');
   const [hoveredPoint, setHoveredPoint] = useState<number | null>(null);
 
-  const EnhancedChart = ({ data, duration }: { data: any[], duration: string }) => {
+  const EnhancedChart = ({ data, duration }: { data: ChartPoint[], duration: string }) => {
     if (!data || data.length === 0) return null;
 
     const maxValue = Math.max(...data.map(d => d.value));
