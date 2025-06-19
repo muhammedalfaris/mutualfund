@@ -5,7 +5,6 @@ import { useTheme } from '@/context/ThemeContext';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 
-// Enhanced fund data with additional fields from reference
 const fund = {
   id: '1',
   name: 'Axis Bluechip Fund',
@@ -18,12 +17,12 @@ const fund = {
     '1Y': 18.5, 
     '3Y': 15.2, 
     '5Y': 12.8,
-    'overall': 19.31 // Overall return percentage
+    'overall': 19.31 
   },
   riskLevel: 'High',
   minInvestment: 100,
   lumpsum: 100,
-  aum: 970.28, // in crores
+  aum: 970.28,
   expenseRatio: 1.0,
   rating: 4.5,
   manager: 'Shreyash Devalkar',
@@ -154,12 +153,17 @@ export default function FundDetailPage() {
             <div>
               <p className="text-sm mb-1" style={{ color: 'var(--color-muted-foreground)' }}>Min. Investment</p>
               <p className="text-lg font-bold" style={{ color: 'var(--color-foreground)' }}>
-                SIP ₹{fund.minInvestment} • Lumpsum ₹{fund.lumpsum}
+                SIP {formatCurrency(fund.minInvestment)} • Lumpsum {formatCurrency(fund.lumpsum)}
               </p>
             </div>
             <div className="text-right">
               <p className="text-sm mb-1" style={{ color: 'var(--color-muted-foreground)' }}>Rating</p>
-              <p className="text-lg font-bold" style={{ color: 'var(--color-foreground)' }}>NA</p>
+              <div className="flex items-center space-x-1">
+                {renderStars(fund.rating)}
+                <span className="text-sm font-medium" style={{ color: 'var(--color-foreground)' }}>
+                  {fund.rating}
+                </span>
+              </div>
             </div>
           </div>
 
