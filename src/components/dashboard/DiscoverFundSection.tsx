@@ -30,7 +30,7 @@ const DiscoverFunds = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedRisk, setSelectedRisk] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('rating');
-  const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [hoveredFund, setHoveredFund] = useState<string | null>(null);
   const [animatedCards, setAnimatedCards] = useState<string[]>([]);
 
@@ -167,7 +167,11 @@ const DiscoverFunds = () => {
   const filteredFunds = fundsData.filter(fund => {
     const categoryMatch = selectedCategory === 'all' || fund.category === selectedCategory;
     const riskMatch = selectedRisk === 'all' || fund.riskLevel === selectedRisk;
-    return categoryMatch && riskMatch;
+    const searchMatch = searchQuery === '' || 
+      fund.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      fund.manager.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      fund.subCategory.toLowerCase().includes(searchQuery.toLowerCase());
+    return categoryMatch && riskMatch && searchMatch;
   });
 
   const sortedFunds = [...filteredFunds].sort((a, b) => {
@@ -184,6 +188,11 @@ const DiscoverFunds = () => {
         return 0;
     }
   });
+
+  // Show only 6 suggested funds when no search/filter is applied
+  const displayFunds = (searchQuery === '' && selectedCategory === 'all' && selectedRisk === 'all') 
+    ? sortedFunds.slice(0, 6) 
+    : sortedFunds;
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -265,37 +274,27 @@ const DiscoverFunds = () => {
             Explore and invest in top-performing mutual funds
           </p>
         </div>
+      </div>
 
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={() => setViewMode('card')}
-            className={`p-2 rounded-lg transition-all duration-200 ${
-              viewMode === 'card' ? 'shadow-md' : 'hover:opacity-70'
-            }`}
-            style={{
-              backgroundColor: viewMode === 'card' ? 'var(--color-primary)' : 'var(--color-muted)',
-              color: viewMode === 'card' ? 'var(--color-background)' : 'var(--color-foreground)',
-            }}
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-            </svg>
-          </button>
-          <button
-            onClick={() => setViewMode('list')}
-            className={`p-2 rounded-lg transition-all duration-200 ${
-              viewMode === 'list' ? 'shadow-md' : 'hover:opacity-70'
-            }`}
-            style={{
-              backgroundColor: viewMode === 'list' ? 'var(--color-primary)' : 'var(--color-muted)',
-              color: viewMode === 'list' ? 'var(--color-background)' : 'var(--color-foreground)',
-            }}
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-            </svg>
-          </button>
+      {/* Search Bar */}
+      <div className="relative">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <svg className="h-5 w-5" style={{ color: 'var(--color-muted-foreground)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
         </div>
+        <input
+          type="text"
+          placeholder="Search funds by name, manager, or category..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full pl-10 pr-4 py-3 rounded-xl border transition-colors"
+          style={{
+            backgroundColor: 'var(--color-input)',
+            borderColor: 'var(--color-border)',
+            color: 'var(--color-foreground)',
+          }}
+        />
       </div>
 
       {/* Category Filter */}
@@ -370,18 +369,14 @@ const DiscoverFunds = () => {
 
         <div className="flex items-end">
           <div className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>
-            {sortedFunds.length} funds found
+            {displayFunds.length} funds {(searchQuery === '' && selectedCategory === 'all' && selectedRisk === 'all') ? 'suggested' : 'found'}
           </div>
         </div>
       </div>
 
-      {/* Funds Grid/List */}
-      <div className={`grid gap-6 ${
-        viewMode === 'card' 
-          ? 'md:grid-cols-2 lg:grid-cols-3' 
-          : 'grid-cols-1'
-      }`}>
-        {sortedFunds.map((fund, index) => (
+      {/* Funds Grid */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {displayFunds.map((fund, index) => (
           <div
             key={fund.id}
             className={`p-6 rounded-2xl border transition-all duration-500 cursor-pointer hover:shadow-xl ${
