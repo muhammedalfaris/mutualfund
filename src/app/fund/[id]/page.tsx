@@ -36,7 +36,6 @@ const fund = {
   growthType: 'GROWTH',
   since: '23 June 2023',
   yearMonths: '1 Year 11 Months',
-  exitLoad: 1.0
 };
 
 const formatCurrency = (amount: number) => {
@@ -210,22 +209,6 @@ export default function FundDetailPage() {
                   <p>Since {fund.since}</p>
                   <p>{fund.yearMonths}</p>
                 </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Exit Load Section */}
-          <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--color-background)' }}>
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">💼</span>
-                <div className="flex items-center gap-1">
-                  <span className="font-medium" style={{ color: 'var(--color-foreground)' }}>Exit Load</span>
-                  <span className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>ⓘ</span>
-                </div>
-              </div>
-              <div className="text-right">
-                <span className="text-lg font-bold" style={{ color: 'var(--color-foreground)' }}>{fund.exitLoad}</span>
               </div>
             </div>
           </div>
