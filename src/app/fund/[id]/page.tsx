@@ -83,7 +83,7 @@ const renderStars = (rating: number) => {
 };
 
 export default function FundDetailPage() {
-  const { currentTheme } = useTheme();
+  const { } = useTheme();
   const router = useRouter();
 
   return (

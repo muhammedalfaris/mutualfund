@@ -24,9 +24,8 @@ interface UserData {
 }
 
 export default function Dashboard() {
-  const { currentTheme, setTheme, availableThemes } = useTheme();
+  const { } = useTheme();
   const [isCardFlipped, setIsCardFlipped] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const portfolioData: PortfolioData = {
     totalInvestment: 10375000,
@@ -44,15 +43,6 @@ export default function Dashboard() {
     accountType: "Premium Investor",
     riskProfile: "Moderate",
   };
-
-  const menuItems = [
-    { name: 'Dashboard', active: true },
-    { name: 'Portfolio', active: false },
-    { name: 'Investments', active: false },
-    { name: 'Transactions', active: false },
-    { name: 'Analytics', active: false },
-    { name: 'Settings', active: false },
-  ];
 
   const quickAccessItems = [
     { name: 'Invest', icon: '💰', color: 'var(--color-success)' },
