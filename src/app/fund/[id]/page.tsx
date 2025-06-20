@@ -7,7 +7,6 @@ import React, { useState } from 'react';
 
 type ChartPoint = { date: string; value: number };
 
-// Enhanced fund data with additional fields from reference
 const fund = {
   id: '1',
   name: 'Axis Bluechip Fund',
@@ -69,6 +68,29 @@ const fund = {
       { date: '2025-06-19', value: 45.67 },
     ],
   },
+  // Sector allocation data
+  sectorAllocation: [
+    { name: 'Financial Services', percentage: 28.45, color: '#3b82f6' },
+    { name: 'Information Technology', percentage: 22.13, color: '#8b5cf6' },
+    { name: 'Consumer Goods', percentage: 15.67, color: '#10b981' },
+    { name: 'Healthcare', percentage: 12.34, color: '#f59e0b' },
+    { name: 'Automobile', percentage: 8.92, color: '#ef4444' },
+    { name: 'Energy', percentage: 7.23, color: '#06b6d4' },
+    { name: 'Others', percentage: 5.26, color: '#64748b' },
+  ],
+  // Top holdings data
+  topHoldings: [
+    { name: 'Reliance Industries Ltd', percentage: 8.45, sector: 'Energy' },
+    { name: 'HDFC Bank Ltd', percentage: 7.23, sector: 'Financial Services' },
+    { name: 'Infosys Ltd', percentage: 6.89, sector: 'Information Technology' },
+    { name: 'ICICI Bank Ltd', percentage: 5.67, sector: 'Financial Services' },
+    { name: 'Tata Consultancy Services', percentage: 5.34, sector: 'Information Technology' },
+    { name: 'Hindustan Unilever Ltd', percentage: 4.78, sector: 'Consumer Goods' },
+    { name: 'ITC Ltd', percentage: 4.23, sector: 'Consumer Goods' },
+    { name: 'State Bank of India', percentage: 3.89, sector: 'Financial Services' },
+    { name: 'Bajaj Finance Ltd', percentage: 3.56, sector: 'Financial Services' },
+    { name: 'Maruti Suzuki India Ltd', percentage: 3.12, sector: 'Automobile' },
+  ],
   riskLevel: 'High',
   minInvestment: 100,
   lumpsum: 100,
@@ -145,6 +167,7 @@ export default function FundDetailPage() {
   const [isFavorite, setIsFavorite] = useState(false);
   const [selectedDuration, setSelectedDuration] = useState('1Y');
   const [hoveredPoint, setHoveredPoint] = useState<number | null>(null);
+  const [activeAllocationTab, setActiveAllocationTab] = useState<'sectors' | 'holdings'>('sectors');
 
   const EnhancedChart = ({ data, duration }: { data: ChartPoint[], duration: string }) => {
     if (!data || data.length === 0) return null;
@@ -373,6 +396,121 @@ export default function FundDetailPage() {
     );
   };
 
+  // Sector Allocation Component
+  const SectorAllocation = () => (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Donut Chart */}
+        <div className="flex justify-center items-center">
+          <div className="relative w-48 h-48">
+            <svg viewBox="0 0 200 200" className="w-full h-full transform -rotate-90">
+              <defs>
+                {fund.sectorAllocation.map((sector, index) => (
+                  <linearGradient key={index} id={`sector-gradient-${index}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor={sector.color} stopOpacity="0.8" />
+                    <stop offset="100%" stopColor={sector.color} stopOpacity="1" />
+                  </linearGradient>
+                ))}
+              </defs>
+              {(() => {
+                let cumulativePercentage = 0;
+                return fund.sectorAllocation.map((sector, index) => {
+                  const startAngle = (cumulativePercentage / 100) * 360;
+                  const endAngle = ((cumulativePercentage + sector.percentage) / 100) * 360;
+                  cumulativePercentage += sector.percentage;
+                  
+                  const startAngleRad = (startAngle * Math.PI) / 180;
+                  const endAngleRad = (endAngle * Math.PI) / 180;
+                  
+                  const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+                  
+                  const x1 = 100 + 70 * Math.cos(startAngleRad);
+                  const y1 = 100 + 70 * Math.sin(startAngleRad);
+                  const x2 = 100 + 70 * Math.cos(endAngleRad);
+                  const y2 = 100 + 70 * Math.sin(endAngleRad);
+                  
+                  const pathData = [
+                    "M", 100, 100,
+                    "L", x1, y1,
+                    "A", 70, 70, 0, largeArcFlag, 1, x2, y2,
+                    "Z"
+                  ].join(" ");
+                  
+                  return (
+                    <path
+                      key={index}
+                      d={pathData}
+                      fill={`url(#sector-gradient-${index})`}
+                      stroke="white"
+                      strokeWidth="2"
+                      className="hover:opacity-80 transition-opacity cursor-pointer"
+                    />
+                  );
+                });
+              })()}
+              <circle cx="100" cy="100" r="35" fill="var(--color-background)" stroke="var(--color-border)" strokeWidth="2" />
+            </svg>
+          </div>
+        </div>
+        
+        {/* Legend */}
+        <div className="space-y-3">
+          {fund.sectorAllocation.map((sector, index) => (
+            <div key={index} className="flex items-center justify-between p-3 rounded-lg border hover:shadow-sm transition-shadow" style={{ backgroundColor: 'var(--color-background)', borderColor: 'var(--color-border)' }}>
+              <div className="flex items-center gap-3">
+                <div className="w-4 h-4 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: sector.color }}></div>
+                <span className="text-sm font-medium" style={{ color: 'var(--color-foreground)' }}>{sector.name}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="h-full rounded-full" style={{ width: `${(sector.percentage / 30) * 100}%`, backgroundColor: sector.color }}></div>
+                </div>
+                <span className="text-sm font-bold" style={{ color: 'var(--color-foreground)' }}>{sector.percentage}%</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  // Top Holdings Component
+  const TopHoldings = () => (
+    <div className="space-y-3">
+      {fund.topHoldings.map((holding, index) => (
+        <div key={index} className="flex items-center justify-between p-4 rounded-lg border hover:shadow-sm transition-all hover:border-blue-200" style={{ backgroundColor: 'var(--color-background)', borderColor: 'var(--color-border)' }}>
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: '#3b82f6' }}>
+                {index + 1}
+              </div>
+              <div>
+                <h4 className="font-semibold text-sm" style={{ color: 'var(--color-foreground)' }}>{holding.name}</h4>
+                <p className="text-xs" style={{ color: 'var(--color-muted-foreground)' }}>{holding.sector}</p>
+              </div>
+            </div>
+            <div className="ml-11">
+              <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-700"
+                  style={{ width: `${(holding.percentage / 9) * 100}%` }}
+                ></div>
+              </div>
+            </div>
+          </div>
+          <div className="text-right ml-4">
+            <span className="text-lg font-bold" style={{ color: 'var(--color-foreground)' }}>{holding.percentage}%</span>
+          </div>
+        </div>
+      ))}
+      <div className="text-center pt-2">
+        <button className="text-sm font-medium hover:underline" style={{ color: 'var(--color-primary)' }}>
+          View All Holdings
+        </button>
+      </div>
+    </div>
+  );
+
   return (
     <div className="justify-center"> 
       <Navbar activeMenu="" />
@@ -525,6 +663,52 @@ export default function FundDetailPage() {
                 data={fund.historicalData[selectedDuration as keyof typeof fund.historicalData]} 
                 duration={selectedDuration}
               />
+            </div>
+          </div>
+
+          {/* Portfolio Allocation Section */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--color-foreground)' }}>
+              Portfolio Allocation
+            </h3>
+            
+            {/* Allocation Tab Selection */}
+            <div className="flex gap-1 mb-6 p-1 rounded-lg" style={{ backgroundColor: 'var(--color-background)' }}>
+              <button
+                onClick={() => setActiveAllocationTab('sectors')}
+                className={`flex-1 py-3 px-4 rounded-md text-sm font-medium transition-all flex items-center justify-center gap-2 ${
+                  activeAllocationTab === 'sectors' 
+                    ? 'shadow-sm' 
+                    : 'hover:opacity-75'
+                }`}
+                style={{
+                  backgroundColor: activeAllocationTab === 'sectors' ? 'var(--color-primary)' : 'transparent',
+                  color: activeAllocationTab === 'sectors' ? 'white' : 'var(--color-foreground)'
+                }}
+              >
+                <span className="text-lg">🏢</span>
+                Sectors
+              </button>
+              <button
+                onClick={() => setActiveAllocationTab('holdings')}
+                className={`flex-1 py-3 px-4 rounded-md text-sm font-medium transition-all flex items-center justify-center gap-2 ${
+                  activeAllocationTab === 'holdings' 
+                    ? 'shadow-sm' 
+                    : 'hover:opacity-75'
+                }`}
+                style={{
+                  backgroundColor: activeAllocationTab === 'holdings' ? 'var(--color-primary)' : 'transparent',
+                  color: activeAllocationTab === 'holdings' ? 'white' : 'var(--color-foreground)'
+                }}
+              >
+                <span className="text-lg">📊</span>
+                Holdings
+              </button>
+            </div>
+
+            {/* Allocation Content */}
+            <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--color-background)' }}>
+              {activeAllocationTab === 'sectors' ? <SectorAllocation /> : <TopHoldings />}
             </div>
           </div>
 
