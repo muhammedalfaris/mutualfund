@@ -192,7 +192,7 @@ export default function FundDetailPage() {
     return (
       <div className="w-full">
         {/* Chart Header */}
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
           <div>
             <h4 className="text-lg font-semibold" style={{ color: 'var(--color-foreground)' }}>
               Performance Over {duration}
@@ -213,7 +213,11 @@ export default function FundDetailPage() {
 
         {/* SVG Chart */}
         <div className="relative bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 rounded-xl p-4 overflow-hidden">
-          <svg width={width} height={height} className="w-full">
+          <svg 
+            viewBox={`0 0 ${width} ${height}`} 
+            className="w-full h-auto"
+            preserveAspectRatio="xMidYMid meet"
+          >
             {/* Gradient Definitions */}
             <defs>
               <linearGradient id={gradientId} x1="0%" y1="0%" x2="0%" y2="100%">
@@ -354,15 +358,15 @@ export default function FundDetailPage() {
         <div className="grid grid-cols-3 gap-4 mt-4">
           <div className="text-center p-3 rounded-lg" style={{ backgroundColor: 'var(--color-background)' }}>
             <div className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>Highest</div>
-            <div className="text-lg font-bold text-green-600">₹{maxValue.toFixed(2)}</div>
+            <div className="text-base font-bold text-green-600">₹{maxValue.toFixed(2)}</div>
           </div>
           <div className="text-center p-3 rounded-lg" style={{ backgroundColor: 'var(--color-background)' }}>
             <div className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>Current</div>
-            <div className="text-lg font-bold" style={{ color: 'var(--color-foreground)' }}>₹{data[data.length - 1].value.toFixed(2)}</div>
+            <div className="text-base font-bold" style={{ color: 'var(--color-foreground)' }}>₹{data[data.length - 1].value.toFixed(2)}</div>
           </div>
           <div className="text-center p-3 rounded-lg" style={{ backgroundColor: 'var(--color-background)' }}>
             <div className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>Lowest</div>
-            <div className="text-lg font-bold text-red-600">₹{minValue.toFixed(2)}</div>
+            <div className="text-base font-bold text-red-600">₹{minValue.toFixed(2)}</div>
           </div>
         </div>
       </div>
@@ -373,7 +377,7 @@ export default function FundDetailPage() {
     <div className="justify-center"> 
       <Navbar activeMenu="" />
       <div className="min-h-screen flex flex-col items-center px-4 py-8" style={{ backgroundColor: 'var(--color-background)' }}>
-        <div className="w-full max-w-2xl p-8 rounded-2xl border shadow-lg space-y-6" style={{ backgroundColor: 'var(--color-muted)', borderColor: 'var(--color-border)' }}>
+        <div className="w-full max-w-2xl p-6 rounded-2xl border shadow-lg space-y-6" style={{ backgroundColor: 'var(--color-muted)', borderColor: 'var(--color-border)' }}>
           
           {/* Header with back button and favorite */}
           <div className="flex items-center justify-between">
@@ -516,7 +520,7 @@ export default function FundDetailPage() {
             </div>
 
             {/* Enhanced Graph Display */}
-            <div className="p-6 rounded-lg" style={{ backgroundColor: 'var(--color-background)' }}>
+            <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--color-background)' }}>
               <EnhancedChart 
                 data={fund.historicalData[selectedDuration as keyof typeof fund.historicalData]} 
                 duration={selectedDuration}
