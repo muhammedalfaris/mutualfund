@@ -225,7 +225,7 @@ export default function FundDetailPage() {
             </p>
           </div>
           <div className="text-right">
-            <div className={`text-2xl font-bold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+            <div className={`text-xl font-bold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
               {isPositive ? '+' : ''}{fund.returns[duration as keyof typeof fund.returns]?.toFixed(1)}%
             </div>
             <p className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>
@@ -481,7 +481,7 @@ export default function FundDetailPage() {
         <div key={index} className="flex items-center justify-between p-4 rounded-lg border hover:shadow-sm transition-all hover:border-blue-200" style={{ backgroundColor: 'var(--color-background)', borderColor: 'var(--color-border)' }}>
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: '#3b82f6' }}>
+              <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: 'var(--color-primary)' }}>
                 {index + 1}
               </div>
               <div>
@@ -492,8 +492,8 @@ export default function FundDetailPage() {
             <div className="ml-11">
               <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
                 <div 
-                  className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-700"
-                  style={{ width: `${(holding.percentage / 9) * 100}%` }}
+                  className="h-full rounded-full transition-all duration-700"
+                  style={{ width: `${(holding.percentage / 9) * 100}%`, backgroundColor: 'var(--color-primary)' }}
                 ></div>
               </div>
             </div>
@@ -515,7 +515,7 @@ export default function FundDetailPage() {
     <div className="justify-center"> 
       <Navbar activeMenu="" />
       <div className="min-h-screen flex flex-col items-center px-4 py-8" style={{ backgroundColor: 'var(--color-background)' }}>
-        <div className="w-full max-w-2xl p-6 rounded-2xl border shadow-lg space-y-6" style={{ backgroundColor: 'var(--color-muted)', borderColor: 'var(--color-border)' }}>
+        <div className="w-full max-w-2xl p-4 rounded-2xl border shadow-lg space-y-6" style={{ backgroundColor: 'var(--color-muted)', borderColor: 'var(--color-border)' }}>
           
           {/* Header with back button and favorite */}
           <div className="flex items-center justify-between">
