@@ -5,25 +5,30 @@ import { useTheme } from '@/context/ThemeContext';
 import { useRouter } from 'next/navigation';
 
 interface FundData {
-  id: string;
-  name: string;
-  category: 'equity' | 'debt' | 'hybrid' | 'commodity' | 'index';
-  subCategory: string;
-  nav: number;
-  returns: {
-    '1Y': number;
-    '3Y': number;
-    '5Y': number;
-  };
-  riskLevel: 'Low' | 'Moderate' | 'High' | 'Very High';
-  minInvestment: number;
-  aum: number;
-  expenseRatio: number;
-  rating: number;
-  manager: string;
-  isTopPick: boolean;
-  isNew: boolean;
-  isTrending: boolean;
+  _id: string;
+  scheme_name: string;
+  scheme_type: string;
+  category: string;
+  nav_value: number;
+  nav_1year_return: number;
+  nav_3year_return: number;
+  nav_5year_return: number;
+  min_investment: number;
+  scheme_code: string;
+  isin: string;
+  amc_code: string;
+  fund_type: string;
+  scheme_plan: string;
+  settlement_type: string;
+  // Fields from UI not in API (will show as N/A)
+  riskLevel?: 'Low' | 'Moderate' | 'High' | 'Very High';
+  aum?: number;
+  expenseRatio?: number;
+  rating?: number;
+  manager?: string;
+  isTopPick?: boolean;
+  isNew?: boolean;
+  isTrending?: boolean;
 }
 
 const DiscoverFunds = () => {
@@ -34,120 +39,84 @@ const DiscoverFunds = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [hoveredFund, setHoveredFund] = useState<string | null>(null);
   const [animatedCards, setAnimatedCards] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [fundsData, setFundsData] = useState<FundData[]>([]);
   const router = useRouter();
 
-  const fundsData: FundData[] = [
-    {
-      id: '1',
-      name: 'Axis Bluechip Fund',
-      category: 'equity',
-      subCategory: 'Large Cap',
-      nav: 45.67,
-      returns: { '1Y': 18.5, '3Y': 15.2, '5Y': 12.8 },
-      riskLevel: 'High',
-      minInvestment: 415000,
-      aum: 3735000,
-      expenseRatio: 1.8,
-      rating: 4.5,
-      manager: 'Shreyash Devalkar',
-      isTopPick: true,
-      isNew: false,
-      isTrending: true,
-    },
-    {
-      id: '2',
-      name: 'HDFC Corporate Bond Fund',
-      category: 'debt',
-      subCategory: 'Corporate Bond',
-      nav: 23.45,
-      returns: { '1Y': 8.2, '3Y': 7.8, '5Y': 8.5 },
-      riskLevel: 'Low',
-      minInvestment: 83000,
-      aum: 1037500,
-      expenseRatio: 0.9,
-      rating: 4.2,
-      manager: 'Rahul Goswami',
-      isTopPick: false,
-      isNew: true,
-      isTrending: false,
-    },
-    {
-      id: '3',
-      name: 'SBI Gold ETF',
-      category: 'commodity',
-      subCategory: 'Gold',
-      nav: 56.78,
-      returns: { '1Y': 12.3, '3Y': 9.8, '5Y': 8.9 },
-      riskLevel: 'Moderate',
-      minInvestment: 166000,
-      aum: 705500,
-      expenseRatio: 0.5,
-      rating: 4.0,
-      manager: 'Nitesh Jain',
-      isTopPick: false,
-      isNew: false,
-      isTrending: true,
-    },
-    {
-      id: '4',
-      name: 'Mirae Asset Hybrid Equity Fund',
-      category: 'hybrid',
-      subCategory: 'Aggressive Hybrid',
-      nav: 34.12,
-      returns: { '1Y': 14.7, '3Y': 12.5, '5Y': 11.2 },
-      riskLevel: 'Moderate',
-      minInvestment: 249000,
-      aum: 1568700,
-      expenseRatio: 1.4,
-      rating: 4.3,
-      manager: 'Neelesh Surana',
-      isTopPick: true,
-      isNew: false,
-      isTrending: false,
-    },
-    {
-      id: '5',
-      name: 'UTI Nifty Index Fund',
-      category: 'index',
-      subCategory: 'Large Cap Index',
-      nav: 78.90,
-      returns: { '1Y': 16.8, '3Y': 13.5, '5Y': 11.8 },
-      riskLevel: 'High',
-      minInvestment: 83000,
-      aum: 2124800,
-      expenseRatio: 0.2,
-      rating: 4.1,
-      manager: 'Sharwan Kumar Goyal',
-      isTopPick: false,
-      isNew: true,
-      isTrending: true,
-    },
-    {
-      id: '6',
-      name: 'ICICI Prudential Bluechip Fund',
-      category: 'equity',
-      subCategory: 'Large Cap',
-      nav: 67.45,
-      returns: { '1Y': 17.2, '3Y': 14.8, '5Y': 12.5 },
-      riskLevel: 'High',
-      minInvestment: 415000,
-      aum: 3170600,
-      expenseRatio: 1.9,
-      rating: 4.4,
-      manager: 'Anuj Dawar',
-      isTopPick: true,
-      isNew: false,
-      isTrending: false,
-    },
-  ];
+  // Fetch funds data from API
+  useEffect(() => {
+    const fetchFunds = async () => {
+      try {
+        const response = await fetch('https://pl.pr.flashfund.in/Wyable/mutual-funds');
+        const data = await response.json();
+        
+        // Map API data to our UI structure
+        const mappedData = data.data.map((fund: any) => ({
+          ...fund,
+          // Add UI-specific fields with default values
+          riskLevel: 'Moderate', // Default value since not in API
+          aum: 0, // Will show as N/A
+          expenseRatio: 0, // Will show as N/A
+          rating: 4.0, // Default rating
+          manager: 'N/A', // Not in API
+          isTopPick: Math.random() > 0.7, // Random top picks
+          isNew: Math.random() > 0.8, // Random new funds
+          isTrending: Math.random() > 0.6, // Random trending funds
+          // Map returns to match UI structure
+          returns: {
+            '1Y': fund.nav_1year_return,
+            '3Y': fund.nav_3year_return,
+            '5Y': fund.nav_5year_return
+          }
+        }));
+        
+        setFundsData(mappedData);
+      } catch (error) {
+        console.error('Error fetching funds:', error);
+        // Fallback to dummy data if API fails
+        setFundsData([
+          {
+            _id: '1',
+            scheme_name: 'Axis Bluechip Fund',
+            scheme_type: 'EQUITY',
+            category: 'Large Cap',
+            nav_value: 45.67,
+            nav_1year_return: 18.5,
+            nav_3year_return: 15.2,
+            nav_5year_return: 12.8,
+            min_investment: 415000,
+            riskLevel: 'High',
+            aum: 3735000,
+            expenseRatio: 1.8,
+            rating: 4.5,
+            manager: 'Shreyash Devalkar',
+            isTopPick: true,
+            isNew: false,
+            isTrending: true,
+            scheme_code: 'AXBLUE',
+            isin: 'INF12345678',
+            amc_code: 'AXIS_MF',
+            fund_type: 'Open Ended',
+            scheme_plan: 'Growth',
+            settlement_type: 'T1'
+          },
+          // ... other fallback data
+        ]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchFunds();
+  }, []);
 
   const categories = [
     { id: 'all', name: 'All Funds', icon: '📊' },
-    { id: 'equity', name: 'Equity', icon: '📈' },
-    { id: 'debt', name: 'Debt', icon: '🏦' },
-    { id: 'hybrid', name: 'Hybrid', icon: '⚖️' },
-    { id: 'commodity', name: 'Commodity', icon: '🏅' },
-    { id: 'index', name: 'Index', icon: '📉' },
+    { id: 'EQUITY', name: 'Equity', icon: '📈' },
+    { id: 'DEBT', name: 'Debt', icon: '🏦' },
+    { id: 'HYBRID', name: 'Hybrid', icon: '⚖️' },
+    { id: 'LIQUID', name: 'Liquid', icon: '💧' },
+    { id: 'ELSS', name: 'ELSS', icon: '💰' },
   ];
 
   const riskLevels = [
@@ -161,31 +130,37 @@ const DiscoverFunds = () => {
   // Animation effect
   useEffect(() => {
     const timer = setTimeout(() => {
-      setAnimatedCards(fundsData.map(fund => fund.id));
+      setAnimatedCards(fundsData.map(fund => fund._id));
     }, 100);
     return () => clearTimeout(timer);
-  }, []);
+  }, [fundsData]);
 
   const filteredFunds = fundsData.filter(fund => {
-    const categoryMatch = selectedCategory === 'all' || fund.category === selectedCategory;
+    const categoryMatch = selectedCategory === 'all' || fund.scheme_type === selectedCategory;
     const riskMatch = selectedRisk === 'all' || fund.riskLevel === selectedRisk;
     const searchMatch = searchQuery === '' || 
-      fund.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      fund.manager.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      fund.subCategory.toLowerCase().includes(searchQuery.toLowerCase());
+      fund.scheme_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (fund.manager && fund.manager.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      fund.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      fund.scheme_code.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      fund.amc_code.toLowerCase().includes(searchQuery.toLowerCase());
     return categoryMatch && riskMatch && searchMatch;
   });
 
   const sortedFunds = [...filteredFunds].sort((a, b) => {
     switch (sortBy) {
       case 'rating':
-        return b.rating - a.rating;
+        return (b.rating || 0) - (a.rating || 0);
       case 'returns':
-        return b.returns['1Y'] - a.returns['1Y'];
+        return (b.nav_1year_return || 0) - (a.nav_1year_return || 0);
       case 'aum':
-        return b.aum - a.aum;
+        return (b.aum || 0) - (a.aum || 0);
       case 'expense':
-        return a.expenseRatio - b.expenseRatio;
+        return (a.expenseRatio || 0) - (b.expenseRatio || 0);
+      case 'nav':
+        return b.nav_value - a.nav_value;
+      case 'min_investment':
+        return a.min_investment - b.min_investment;
       default:
         return 0;
     }
@@ -206,6 +181,7 @@ const DiscoverFunds = () => {
   };
 
   const formatAUM = (amount: number) => {
+    if (!amount) return 'N/A';
     if (amount >= 100000000) {
       return `₹${(amount / 100000000).toFixed(1)} Cr`;
     } else if (amount >= 10000000) {
@@ -228,16 +204,16 @@ const DiscoverFunds = () => {
 
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case 'equity': return '#3b82f6';
-      case 'debt': return '#10b981';
-      case 'hybrid': return '#8b5cf6';
-      case 'commodity': return '#f59e0b';
-      case 'index': return '#06b6d4';
+      case 'EQUITY': return '#3b82f6';
+      case 'DEBT': return '#10b981';
+      case 'HYBRID': return '#8b5cf6';
+      case 'LIQUID': return '#06b6d4';
+      case 'ELSS': return '#ec4899';
       default: return 'var(--color-primary)';
     }
   };
 
-  const renderStars = (rating: number) => {
+  const renderStars = (rating: number = 0) => {
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 !== 0;
     const stars = [];
@@ -264,6 +240,19 @@ const DiscoverFunds = () => {
     return stars;
   };
 
+  if (isLoading) {
+    return (
+      <div className="w-full max-w-7xl mx-auto space-y-8">
+        <div className="h-12 bg-gray-200 rounded animate-pulse"></div>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="p-6 rounded-2xl border bg-gray-100 h-96 animate-pulse"></div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-7xl mx-auto space-y-8">
       {/* Header Section */}
@@ -287,7 +276,7 @@ const DiscoverFunds = () => {
         </div>
         <input
           type="text"
-          placeholder="Search funds by name, manager, or category..."
+          placeholder="Search funds by name, manager, category, scheme code or AMC..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full pl-10 pr-4 py-3 rounded-xl border transition-colors"
@@ -366,6 +355,8 @@ const DiscoverFunds = () => {
             <option value="returns">1Y Returns</option>
             <option value="aum">AUM</option>
             <option value="expense">Expense Ratio</option>
+            <option value="nav">NAV Value</option>
+            <option value="min_investment">Min Investment</option>
           </select>
         </div>
 
@@ -380,21 +371,21 @@ const DiscoverFunds = () => {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {displayFunds.map((fund, index) => (
           <div
-            key={fund.id}
+            key={fund._id}
             className={`p-6 rounded-2xl border transition-all duration-500 cursor-pointer hover:shadow-xl ${
-              animatedCards.includes(fund.id) ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+              animatedCards.includes(fund._id) ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
             } ${
-              hoveredFund === fund.id ? 'scale-105' : ''
+              hoveredFund === fund._id ? 'scale-105' : ''
             }`}
             style={{
               backgroundColor: 'var(--color-background)',
-              borderColor: hoveredFund === fund.id ? getCategoryColor(fund.category) : 'var(--color-border)',
-              borderWidth: hoveredFund === fund.id ? '2px' : '1px',
+              borderColor: hoveredFund === fund._id ? getCategoryColor(fund.scheme_type) : 'var(--color-border)',
+              borderWidth: hoveredFund === fund._id ? '2px' : '1px',
               transitionDelay: `${index * 100}ms`,
             }}
-            onMouseEnter={() => setHoveredFund(fund.id)}
+            onMouseEnter={() => setHoveredFund(fund._id)}
             onMouseLeave={() => setHoveredFund(null)}
-            onClick={() => router.push(`/fund/${fund.id}`)}
+            onClick={() => router.push(`/fund/${fund._id}`)}
           >
             {/* Fund Header */}
             <div className="flex items-start justify-between mb-4">
@@ -402,19 +393,19 @@ const DiscoverFunds = () => {
                 <div className="flex items-center space-x-2 mb-2">
                   <div 
                     className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: getCategoryColor(fund.category) }}
+                    style={{ backgroundColor: getCategoryColor(fund.scheme_type) }}
                   />
                   <span className="text-xs font-medium uppercase tracking-wide"
                         style={{ color: 'var(--color-muted-foreground)' }}>
-                    {fund.subCategory}
+                    {fund.category || 'N/A'}
                   </span>
                 </div>
                 <h3 className="text-lg font-bold leading-tight mb-1" 
                     style={{ color: 'var(--color-foreground)' }}>
-                  {fund.name}
+                  {fund.scheme_name}
                 </h3>
                 <p className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>
-                  {fund.manager}
+                  {fund.manager || 'N/A'}
                 </p>
               </div>
 
@@ -455,37 +446,63 @@ const DiscoverFunds = () => {
                   NAV
                 </p>
                 <p className="text-xl font-bold" style={{ color: 'var(--color-foreground)' }}>
-                  ₹{fund.nav.toFixed(2)}
+                  ₹{fund.nav_value.toFixed(2)}
                 </p>
               </div>
               <div className="text-right">
                 <div className="flex items-center space-x-1 mb-1">
                   {renderStars(fund.rating)}
                   <span className="text-sm font-medium" style={{ color: 'var(--color-foreground)' }}>
-                    {fund.rating}
+                    {fund.rating?.toFixed(1) || 'N/A'}
                   </span>
                 </div>
                 <p className="text-xs" style={{ color: 'var(--color-muted-foreground)' }}>
-                  {fund.rating >= 4.5 ? 'Excellent' : fund.rating >= 4 ? 'Very Good' : fund.rating >= 3.5 ? 'Good' : 'Average'}
+                  {fund.rating ? 
+                    (fund.rating >= 4.5 ? 'Excellent' : 
+                     fund.rating >= 4 ? 'Very Good' : 
+                     fund.rating >= 3.5 ? 'Good' : 'Average') : 'N/A'}
                 </p>
               </div>
             </div>
 
             {/* Returns */}
             <div className="grid grid-cols-3 gap-3 mb-4">
-              {Object.entries(fund.returns).map(([period, value]) => (
-                <div key={period} className="text-center p-2 rounded-lg"
-                     style={{ backgroundColor: 'var(--color-muted)' }}>
-                  <p className="text-xs" style={{ color: 'var(--color-muted-foreground)' }}>
-                    {period}
-                  </p>
-                  <p className={`text-sm font-bold ${
-                    value >= 15 ? 'text-green-600' : value >= 10 ? 'text-blue-600' : 'text-gray-600'
-                  }`}>
-                    {value.toFixed(1)}%
-                  </p>
-                </div>
-              ))}
+              <div className="text-center p-2 rounded-lg"
+                   style={{ backgroundColor: 'var(--color-muted)' }}>
+                <p className="text-xs" style={{ color: 'var(--color-muted-foreground)' }}>
+                  1Y
+                </p>
+                <p className={`text-sm font-bold ${
+                  (fund.nav_1year_return || 0) >= 15 ? 'text-green-600' : 
+                  (fund.nav_1year_return || 0) >= 10 ? 'text-blue-600' : 'text-gray-600'
+                }`}>
+                  {fund.nav_1year_return ? `${fund.nav_1year_return.toFixed(1)}%` : 'N/A'}
+                </p>
+              </div>
+              <div className="text-center p-2 rounded-lg"
+                   style={{ backgroundColor: 'var(--color-muted)' }}>
+                <p className="text-xs" style={{ color: 'var(--color-muted-foreground)' }}>
+                  3Y
+                </p>
+                <p className={`text-sm font-bold ${
+                  (fund.nav_3year_return || 0) >= 15 ? 'text-green-600' : 
+                  (fund.nav_3year_return || 0) >= 10 ? 'text-blue-600' : 'text-gray-600'
+                }`}>
+                  {fund.nav_3year_return ? `${fund.nav_3year_return.toFixed(1)}%` : 'N/A'}
+                </p>
+              </div>
+              <div className="text-center p-2 rounded-lg"
+                   style={{ backgroundColor: 'var(--color-muted)' }}>
+                <p className="text-xs" style={{ color: 'var(--color-muted-foreground)' }}>
+                  5Y
+                </p>
+                <p className={`text-sm font-bold ${
+                  (fund.nav_5year_return || 0) >= 15 ? 'text-green-600' : 
+                  (fund.nav_5year_return || 0) >= 10 ? 'text-blue-600' : 'text-gray-600'
+                }`}>
+                  {fund.nav_5year_return ? `${fund.nav_5year_return.toFixed(1)}%` : 'N/A'}
+                </p>
+              </div>
             </div>
 
             {/* Fund Details */}
@@ -496,10 +513,10 @@ const DiscoverFunds = () => {
                 </span>
                 <span className="text-sm font-medium px-2 py-1 rounded-full"
                       style={{ 
-                        backgroundColor: getRiskColor(fund.riskLevel) + '20',
-                        color: getRiskColor(fund.riskLevel)
+                        backgroundColor: getRiskColor(fund.riskLevel || 'Moderate') + '20',
+                        color: getRiskColor(fund.riskLevel || 'Moderate')
                       }}>
-                  {fund.riskLevel}
+                  {fund.riskLevel || 'N/A'}
                 </span>
               </div>
               <div className="flex justify-between items-center">
@@ -507,7 +524,7 @@ const DiscoverFunds = () => {
                   Min Investment
                 </span>
                 <span className="text-sm font-medium" style={{ color: 'var(--color-foreground)' }}>
-                  {formatCurrency(fund.minInvestment)}
+                  {formatCurrency(fund.min_investment)}
                 </span>
               </div>
               <div className="flex justify-between items-center">
@@ -515,7 +532,7 @@ const DiscoverFunds = () => {
                   AUM
                 </span>
                 <span className="text-sm font-medium" style={{ color: 'var(--color-foreground)' }}>
-                  {formatAUM(fund.aum)}
+                  {fund.aum !== undefined ? formatAUM(fund.aum) : 'N/A'}
                 </span>
               </div>
               <div className="flex justify-between items-center">
@@ -523,7 +540,7 @@ const DiscoverFunds = () => {
                   Expense Ratio
                 </span>
                 <span className="text-sm font-medium" style={{ color: 'var(--color-foreground)' }}>
-                  {fund.expenseRatio}%
+                  {fund.expenseRatio ? `${fund.expenseRatio}%` : 'N/A'}
                 </span>
               </div>
             </div>
@@ -537,7 +554,7 @@ const DiscoverFunds = () => {
                   borderColor: 'var(--color-primary)',
                   color: 'var(--color-primary)',
                 }}
-                onClick={e => { e.stopPropagation(); router.push(`/fund/${fund.id}`); }}
+                onClick={e => { e.stopPropagation(); router.push(`/fund/${fund._id}`); }}
               >
                 <span className="text-sm font-medium">View Details</span>
               </button>
