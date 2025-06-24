@@ -51,7 +51,7 @@ const DiscoverFunds = () => {
         const data = await response.json();
         
         // Map API data to our UI structure
-        const mappedData = data.data.map((fund: any) => ({
+        const mappedData = data.data.map((fund: FundData) => ({
           ...fund,
           // Add UI-specific fields with default values
           riskLevel: 'Moderate', // Default value since not in API
