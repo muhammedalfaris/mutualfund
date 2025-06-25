@@ -152,8 +152,9 @@ export default function FundDetailPage() {
         }
         setFundDetails(fund);
         setNavHistory(navData?.results || []);
+        console.log(navHistory);
       } catch (e: any) {
-        setError('Failed to load fund details.');
+        setError('Failed to load fund details.' + e);
       } finally {
         setLoading(false);
       }
