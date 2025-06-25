@@ -551,7 +551,7 @@ export default function FundDetailPage() {
   return (
     <div className="justify-center"> 
       <Navbar activeMenu="" />
-      <div className="min-h-screen flex flex-col items-center px-4 py-8" style={{ backgroundColor: 'var(--color-background)' }}>
+      <div className="min-h-screen flex flex-col items-center px-4 py-8 mt-20" style={{ backgroundColor: 'var(--color-background)' }}>
         <div className="w-full max-w-2xl p-4 rounded-2xl border shadow-lg space-y-6" style={{ backgroundColor: 'var(--color-muted)', borderColor: 'var(--color-border)' }}>
           
           {/* Header with back button and favorite */}
