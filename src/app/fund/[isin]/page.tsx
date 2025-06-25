@@ -6,6 +6,38 @@ import { useRouter, useParams } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 
 type ChartPoint = { date: string; value: number };
+type Sector = { name: string; percentage: number; color: string };
+type Holding = { name: string; percentage: number; sector: string };
+type FundDetails = {
+  name: string;
+  category: string;
+  subCategory: string;
+  nav: number | null;
+  navDate: string;
+  navChange: string;
+  returns: { [key: string]: number | string };
+  historicalData: { [key: string]: ChartPoint[] };
+  sectorAllocation: Sector[];
+  topHoldings: Holding[];
+  riskLevel: string;
+  minInvestment: number | string;
+  lumpsum: number | string;
+  aum: number | string;
+  expenseRatio: number | string;
+  rating: number | string;
+  manager: string;
+  isTopPick: boolean;
+  isNew: boolean;
+  isTrending: boolean;
+  fundType: string;
+  planType: string;
+  investmentType: string;
+  categoryType: string;
+  growthType: string;
+  since: string;
+  yearMonths: string;
+};
+type NavHistoryItem = { isin: string; nav_date: string; nav_value: string };
 
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat('en-IN', {
@@ -68,8 +100,8 @@ export default function FundDetailPage() {
   const [selectedDuration, setSelectedDuration] = useState('1Y');
   const [hoveredPoint, setHoveredPoint] = useState<number | null>(null);
   const [activeAllocationTab, setActiveAllocationTab] = useState<'sectors' | 'holdings'>('sectors');
-  const [fundDetails, setFundDetails] = useState<any>(null);
-  const [navHistory, setNavHistory] = useState<any[]>([]);
+  const [fundDetails, setFundDetails] = useState<FundDetails | null>(null);
+  const [navHistory, setNavHistory] = useState<NavHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -134,13 +166,13 @@ export default function FundDetailPage() {
         };
         // Map NAV history to chart data
         if (Array.isArray(navData?.results)) {
-          const navs = navData.results.map((item: any) => ({
+          const navs = navData.results.map((item: NavHistoryItem) => ({
             date: item.nav_date,
             value: parseFloat(item.nav_value)
           })).reverse();
           // Fill historicalData for 1M, 6M, 1Y, 3Y, 5Y
           const now = new Date();
-          const filterByMonths = (months: number) => navs.filter((n: any) => {
+          const filterByMonths = (months: number) => navs.filter((n: { date: string; value: number }) => {
             const d = new Date(n.date);
             return d >= new Date(now.getFullYear(), now.getMonth() - months, now.getDate());
           });
@@ -400,7 +432,7 @@ export default function FundDetailPage() {
           <div className="relative w-48 h-48">
             <svg viewBox="0 0 200 200" className="w-full h-full transform -rotate-90">
               <defs>
-                {fundDetails?.sectorAllocation.map((sector: any, index: number) => (
+                {fundDetails?.sectorAllocation.map((sector: Sector, index: number) => (
                   <linearGradient key={index} id={`sector-gradient-${index}`} x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor={sector.color} stopOpacity="0.8" />
                     <stop offset="100%" stopColor={sector.color} stopOpacity="1" />
@@ -409,7 +441,7 @@ export default function FundDetailPage() {
               </defs>
               {(() => {
                 let cumulativePercentage = 0;
-                return fundDetails?.sectorAllocation.map((sector: any, index: number) => {
+                return fundDetails?.sectorAllocation.map((sector: Sector, index: number) => {
                   const startAngle = (cumulativePercentage / 100) * 360;
                   const endAngle = ((cumulativePercentage + sector.percentage) / 100) * 360;
                   cumulativePercentage += sector.percentage;
@@ -450,7 +482,7 @@ export default function FundDetailPage() {
         
         {/* Legend */}
         <div className="space-y-3">
-          {fundDetails?.sectorAllocation.map((sector: any, index: number) => (
+          {fundDetails?.sectorAllocation.map((sector: Sector, index: number) => (
             <div key={index} className="flex items-center justify-between p-3 rounded-lg border hover:shadow-sm transition-shadow" style={{ backgroundColor: 'var(--color-background)', borderColor: 'var(--color-border)' }}>
               <div className="flex items-center gap-3">
                 <div className="w-4 h-4 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: sector.color }}></div>
@@ -472,7 +504,7 @@ export default function FundDetailPage() {
   // Top Holdings Component
   const TopHoldings = () => (
     <div className="space-y-3">
-      {fundDetails?.topHoldings.map((holding: any, index: number) => (
+      {fundDetails?.topHoldings.map((holding: Holding, index: number) => (
         <div key={index} className="flex items-center justify-between p-4 rounded-lg border hover:shadow-sm transition-all hover:border-blue-200" style={{ backgroundColor: 'var(--color-background)', borderColor: 'var(--color-border)' }}>
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
@@ -574,15 +606,15 @@ export default function FundDetailPage() {
             <div>
               <p className="text-sm mb-1" style={{ color: 'var(--color-muted-foreground)' }}>Min. Investment</p>
               <p className="text-lg font-bold" style={{ color: 'var(--color-foreground)' }}>
-                SIP {formatCurrency(fundDetails?.minInvestment)} • Lumpsum {formatCurrency(fundDetails?.lumpsum)}
+                SIP {typeof fundDetails?.minInvestment === 'number' ? formatCurrency(fundDetails.minInvestment) : 'N/A'} • Lumpsum {typeof fundDetails?.lumpsum === 'number' ? formatCurrency(fundDetails.lumpsum) : 'N/A'}
               </p>
             </div>
             <div className="text-right">
               <p className="text-sm mb-1" style={{ color: 'var(--color-muted-foreground)' }}>Rating</p>
               <div className="flex items-center space-x-1">
-                {renderStars(fundDetails?.rating)}
+                {renderStars(typeof fundDetails?.rating === 'number' ? fundDetails.rating : 0)}
                 <span className="text-sm font-medium" style={{ color: 'var(--color-foreground)' }}>
-                  {fundDetails?.rating}
+                  {typeof fundDetails?.rating === 'number' ? fundDetails.rating : 'N/A'}
                 </span>
               </div>
             </div>
@@ -610,7 +642,7 @@ export default function FundDetailPage() {
               </div>
               <div className="text-right">
                 <div className="flex items-center gap-2">
-                  <span className="text-lg font-bold" style={{ color: 'var(--color-foreground)' }}>₹{fundDetails?.nav.toFixed(3)}</span>
+                  <span className="text-lg font-bold" style={{ color: 'var(--color-foreground)' }}>{typeof fundDetails?.nav === 'number' ? `₹${fundDetails.nav.toFixed(3)}` : 'N/A'}</span>
                   <span className="text-sm font-medium text-green-600">↗ {fundDetails?.navChange}</span>
                 </div>
                 <p className="text-xs" style={{ color: 'var(--color-muted-foreground)' }}>as on {fundDetails?.navDate}</p>
