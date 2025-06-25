@@ -385,7 +385,7 @@ const DiscoverFunds = () => {
             }}
             onMouseEnter={() => setHoveredFund(fund._id)}
             onMouseLeave={() => setHoveredFund(null)}
-            onClick={() => router.push(`/fund/${fund._id}`)}
+            onClick={() => router.push(`/fund/${fund.isin}`)}
           >
             {/* Fund Header */}
             <div className="flex items-start justify-between mb-4">
@@ -554,7 +554,7 @@ const DiscoverFunds = () => {
                   borderColor: 'var(--color-primary)',
                   color: 'var(--color-primary)',
                 }}
-                onClick={e => { e.stopPropagation(); router.push(`/fund/${fund._id}`); }}
+                onClick={e => { e.stopPropagation(); router.push(`/fund/${fund.isin}`); }}
               >
                 <span className="text-sm font-medium">View Details</span>
               </button>

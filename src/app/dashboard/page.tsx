@@ -70,7 +70,7 @@ export default function Dashboard() {
     <div className="min-h-screen" style={{ backgroundColor: 'var(--color-background)' }}>
       <Navbar activeMenu="Dashboard" />
 
-      <main className="max-w-7xl mx-auto px-4 lg:px-6 py-8">
+      <main className="max-w-7xl mx-auto px-4 mt-20 lg:px-6 py-8">
         <div className="mb-8">
           <h2 className="text-3xl font-bold mb-2" style={{ color: 'var(--color-foreground)' }}>
             Welcome back, John

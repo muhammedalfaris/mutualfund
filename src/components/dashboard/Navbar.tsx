@@ -41,7 +41,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
   // In the future, fetch user data here and use it instead of mockUserData
 
   return (
-    <nav className="border-b px-4 lg:px-4 py-4"
+    <nav className="border-b px-4 lg:px-4 py-4 fixed top-0 left-0 right-0 z-50"
          style={{ backgroundColor: 'var(--color-muted)', borderColor: 'var(--color-border)' }}>
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         <div className="flex items-center space-x-2">

@@ -2,113 +2,10 @@
 
 import Navbar from '@/components/dashboard/Navbar';
 import { useTheme } from '@/context/ThemeContext';
-import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
 
 type ChartPoint = { date: string; value: number };
-
-const fund = {
-  id: '1',
-  name: 'Axis Bluechip Fund',
-  category: 'equity',
-  subCategory: 'Large Cap',
-  nav: 45.67,
-  navDate: '16 Jun 2025',
-  navChange: 1.12,
-  returns: { 
-    '1M': 2.3,
-    '6M': 8.7,
-    '1Y': 18.5, 
-    '3Y': 15.2, 
-    '5Y': 12.8,
-    'overall': 19.31 // Overall return percentage
-  },
-  // Historical data for graph (sample data points)
-  historicalData: {
-    '1M': [
-      { date: '2025-05-19', value: 44.89 },
-      { date: '2025-05-26', value: 45.12 },
-      { date: '2025-06-02', value: 44.78 },
-      { date: '2025-06-09', value: 45.23 },
-      { date: '2025-06-16', value: 45.67 },
-    ],
-    '6M': [
-      { date: '2024-12-19', value: 42.15 },
-      { date: '2025-01-19', value: 43.20 },
-      { date: '2025-02-19', value: 42.85 },
-      { date: '2025-03-19', value: 44.10 },
-      { date: '2025-04-19', value: 44.95 },
-      { date: '2025-05-19', value: 44.89 },
-      { date: '2025-06-19', value: 45.67 },
-    ],
-    '1Y': [
-      { date: '2024-06-19', value: 38.45 },
-      { date: '2024-08-19', value: 39.80 },
-      { date: '2024-10-19', value: 41.20 },
-      { date: '2024-12-19', value: 42.15 },
-      { date: '2025-02-19', value: 42.85 },
-      { date: '2025-04-19', value: 44.95 },
-      { date: '2025-06-19', value: 45.67 },
-    ],
-    '3Y': [
-      { date: '2022-06-19', value: 35.20 },
-      { date: '2022-12-19', value: 36.80 },
-      { date: '2023-06-19', value: 38.90 },
-      { date: '2023-12-19', value: 40.50 },
-      { date: '2024-06-19', value: 38.45 },
-      { date: '2024-12-19', value: 42.15 },
-      { date: '2025-06-19', value: 45.67 },
-    ],
-    '5Y': [
-      { date: '2020-06-19', value: 28.90 },
-      { date: '2021-06-19', value: 32.40 },
-      { date: '2022-06-19', value: 35.20 },
-      { date: '2023-06-19', value: 38.90 },
-      { date: '2024-06-19', value: 38.45 },
-      { date: '2025-06-19', value: 45.67 },
-    ],
-  },
-  // Sector allocation data
-  sectorAllocation: [
-    { name: 'Financial Services', percentage: 28.45, color: '#3b82f6' },
-    { name: 'Information Technology', percentage: 22.13, color: '#8b5cf6' },
-    { name: 'Consumer Goods', percentage: 15.67, color: '#10b981' },
-    { name: 'Healthcare', percentage: 12.34, color: '#f59e0b' },
-    { name: 'Automobile', percentage: 8.92, color: '#ef4444' },
-    { name: 'Energy', percentage: 7.23, color: '#06b6d4' },
-    { name: 'Others', percentage: 5.26, color: '#64748b' },
-  ],
-  // Top holdings data
-  topHoldings: [
-    { name: 'Reliance Industries Ltd', percentage: 8.45, sector: 'Energy' },
-    { name: 'HDFC Bank Ltd', percentage: 7.23, sector: 'Financial Services' },
-    { name: 'Infosys Ltd', percentage: 6.89, sector: 'Information Technology' },
-    { name: 'ICICI Bank Ltd', percentage: 5.67, sector: 'Financial Services' },
-    { name: 'Tata Consultancy Services', percentage: 5.34, sector: 'Information Technology' },
-    { name: 'Hindustan Unilever Ltd', percentage: 4.78, sector: 'Consumer Goods' },
-    { name: 'ITC Ltd', percentage: 4.23, sector: 'Consumer Goods' },
-    { name: 'State Bank of India', percentage: 3.89, sector: 'Financial Services' },
-    { name: 'Bajaj Finance Ltd', percentage: 3.56, sector: 'Financial Services' },
-    { name: 'Maruti Suzuki India Ltd', percentage: 3.12, sector: 'Automobile' },
-  ],
-  riskLevel: 'High',
-  minInvestment: 100,
-  lumpsum: 100,
-  aum: 970.28, // in crores
-  expenseRatio: 1.0,
-  rating: 4.5,
-  manager: 'Shreyash Devalkar',
-  isTopPick: true,
-  isNew: false,
-  isTrending: true,
-  fundType: 'OPEN-ENDED',
-  planType: 'DIRECT PLAN',
-  investmentType: 'EQUITY',
-  categoryType: 'SECTORAL/THEMATIC',
-  growthType: 'GROWTH',
-  since: '23 June 2023',
-  yearMonths: '1 Year 11 Months',
-};
 
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat('en-IN', {
@@ -119,7 +16,8 @@ const formatCurrency = (amount: number) => {
   }).format(amount);
 };
 
-const formatAUM = (amount: number) => {
+const formatAUM = (amount: number | string | undefined) => {
+  if (typeof amount !== 'number' || isNaN(amount)) return 'N/A';
   return `₹${amount.toFixed(2)}Cr`;
 };
 
@@ -164,10 +62,104 @@ const renderStars = (rating: number) => {
 export default function FundDetailPage() {
   const { } = useTheme();
   const router = useRouter();
+  const params = useParams();
+  const isin = Array.isArray(params.isin) ? params.isin[0] : params.isin;
   const [isFavorite, setIsFavorite] = useState(false);
   const [selectedDuration, setSelectedDuration] = useState('1Y');
   const [hoveredPoint, setHoveredPoint] = useState<number | null>(null);
   const [activeAllocationTab, setActiveAllocationTab] = useState<'sectors' | 'holdings'>('sectors');
+  const [fundDetails, setFundDetails] = useState<any>(null);
+  const [navHistory, setNavHistory] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isin) return;
+    setLoading(true);
+    setError(null);
+    // Fetch fund details
+    const fetchDetails = async () => {
+      try {
+        const [detailsRes, navRes] = await Promise.all([
+          fetch(`https://pl.pr.flashfund.in/schemedetails/scheme/detail/${isin}`),
+          fetch(`https://vyable-be.onrender.com/scheme/nav-history/?isin=${isin}`)
+        ]);
+        const detailsData = await detailsRes.json();
+        const navData = await navRes.json();
+        // Map API response to UI structure
+        const basic = detailsData?.data?.basic_info || {};
+        const perf = detailsData?.data?.risk_and_performance || {};
+        const invest = detailsData?.data?.investment_details || {};
+        const fund = {
+          name: basic.scheme_name || 'N/A',
+          category: basic.scheme_type || 'N/A',
+          subCategory: basic.category || 'N/A',
+          nav: perf.current_nav ?? null,
+          navDate: navData?.results?.[0]?.nav_date ? new Date(navData.results[0].nav_date).toLocaleDateString('en-IN') : 'N/A',
+          navChange: 'N/A', // Not available in API
+          returns: {
+            '1M': 'N/A',
+            '6M': 'N/A',
+            '1Y': perf.nav_1year_return ?? 'N/A',
+            '3Y': perf.nav_3year_return ?? 'N/A',
+            '5Y': perf.nav_5year_return ?? 'N/A',
+            'overall': 'N/A',
+          },
+          historicalData: {
+            '1M': [],
+            '6M': [],
+            '1Y': [],
+            '3Y': [],
+            '5Y': [],
+          },
+          sectorAllocation: [], // Not available in API
+          topHoldings: [], // Not available in API
+          riskLevel: perf.current_risk || 'N/A',
+          minInvestment: invest.min_sip_amount ?? 'N/A',
+          lumpsum: invest.face_value ?? 'N/A',
+          aum: 'N/A', // Not available in API
+          expenseRatio: 'N/A', // Not available in API
+          rating: 'N/A', // Not available in API
+          manager: invest.fund_manager || 'N/A',
+          isTopPick: false,
+          isNew: false,
+          isTrending: false,
+          fundType: basic.fund_type || 'N/A',
+          planType: basic.scheme_plan || 'N/A',
+          investmentType: basic.scheme_type || 'N/A',
+          categoryType: basic.category || 'N/A',
+          growthType: 'N/A',
+          since: detailsData?.data?.dates_and_status?.start_date ? new Date(detailsData.data.dates_and_status.start_date).toLocaleDateString('en-IN') : 'N/A',
+          yearMonths: 'N/A',
+        };
+        // Map NAV history to chart data
+        if (Array.isArray(navData?.results)) {
+          const navs = navData.results.map((item: any) => ({
+            date: item.nav_date,
+            value: parseFloat(item.nav_value)
+          })).reverse();
+          // Fill historicalData for 1M, 6M, 1Y, 3Y, 5Y
+          const now = new Date();
+          const filterByMonths = (months: number) => navs.filter((n: any) => {
+            const d = new Date(n.date);
+            return d >= new Date(now.getFullYear(), now.getMonth() - months, now.getDate());
+          });
+          fund.historicalData['1M'] = filterByMonths(1);
+          fund.historicalData['6M'] = filterByMonths(6);
+          fund.historicalData['1Y'] = filterByMonths(12);
+          fund.historicalData['3Y'] = filterByMonths(36);
+          fund.historicalData['5Y'] = filterByMonths(60);
+        }
+        setFundDetails(fund);
+        setNavHistory(navData?.results || []);
+      } catch (e: any) {
+        setError('Failed to load fund details.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDetails();
+  }, [isin]);
 
   const EnhancedChart = ({ data, duration }: { data: ChartPoint[], duration: string }) => {
     if (!data || data.length === 0) return null;
@@ -226,7 +218,9 @@ export default function FundDetailPage() {
           </div>
           <div className="text-right">
             <div className={`text-xl font-bold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-              {isPositive ? '+' : ''}{fund.returns[duration as keyof typeof fund.returns]?.toFixed(1)}%
+              {typeof fundDetails?.returns[duration as keyof typeof fundDetails.returns] === 'number'
+                ? `${isPositive ? '+' : ''}${(fundDetails.returns[duration as keyof typeof fundDetails.returns] as number).toFixed(1)}%`
+                : 'N/A'}
             </div>
             <p className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>
               {duration} Return
@@ -405,7 +399,7 @@ export default function FundDetailPage() {
           <div className="relative w-48 h-48">
             <svg viewBox="0 0 200 200" className="w-full h-full transform -rotate-90">
               <defs>
-                {fund.sectorAllocation.map((sector, index) => (
+                {fundDetails?.sectorAllocation.map((sector: any, index: number) => (
                   <linearGradient key={index} id={`sector-gradient-${index}`} x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor={sector.color} stopOpacity="0.8" />
                     <stop offset="100%" stopColor={sector.color} stopOpacity="1" />
@@ -414,7 +408,7 @@ export default function FundDetailPage() {
               </defs>
               {(() => {
                 let cumulativePercentage = 0;
-                return fund.sectorAllocation.map((sector, index) => {
+                return fundDetails?.sectorAllocation.map((sector: any, index: number) => {
                   const startAngle = (cumulativePercentage / 100) * 360;
                   const endAngle = ((cumulativePercentage + sector.percentage) / 100) * 360;
                   cumulativePercentage += sector.percentage;
@@ -455,7 +449,7 @@ export default function FundDetailPage() {
         
         {/* Legend */}
         <div className="space-y-3">
-          {fund.sectorAllocation.map((sector, index) => (
+          {fundDetails?.sectorAllocation.map((sector: any, index: number) => (
             <div key={index} className="flex items-center justify-between p-3 rounded-lg border hover:shadow-sm transition-shadow" style={{ backgroundColor: 'var(--color-background)', borderColor: 'var(--color-border)' }}>
               <div className="flex items-center gap-3">
                 <div className="w-4 h-4 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: sector.color }}></div>
@@ -477,7 +471,7 @@ export default function FundDetailPage() {
   // Top Holdings Component
   const TopHoldings = () => (
     <div className="space-y-3">
-      {fund.topHoldings.map((holding, index) => (
+      {fundDetails?.topHoldings.map((holding: any, index: number) => (
         <div key={index} className="flex items-center justify-between p-4 rounded-lg border hover:shadow-sm transition-all hover:border-blue-200" style={{ backgroundColor: 'var(--color-background)', borderColor: 'var(--color-border)' }}>
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
@@ -511,6 +505,16 @@ export default function FundDetailPage() {
     </div>
   );
 
+  if (loading) {
+    return <div className="flex justify-center items-center min-h-screen">Loading fund details...</div>;
+  }
+  if (error) {
+    return <div className="flex justify-center items-center min-h-screen text-red-500">{error}</div>;
+  }
+  if (!fundDetails) {
+    return null;
+  }
+
   return (
     <div className="justify-center"> 
       <Navbar activeMenu="" />
@@ -537,30 +541,30 @@ export default function FundDetailPage() {
 
           {/* Fund Name and Logo */}
           <div className="flex items-center space-x-4">
-            <div className="w-8 h-8 rounded border flex items-center justify-center text-white font-bold text-sm" style={{ backgroundColor: getCategoryColor(fund.category) }}>
+            <div className="w-8 h-8 rounded border flex items-center justify-center text-white font-bold text-sm" style={{ backgroundColor: getCategoryColor(fundDetails?.category) }}>
               AB
             </div>
             <div>
-              <h2 className="text-xl font-bold" style={{ color: 'var(--color-foreground)' }}>{fund.name}</h2>
+              <h2 className="text-xl font-bold" style={{ color: 'var(--color-foreground)' }}>{fundDetails?.name}</h2>
             </div>
           </div>
 
           {/* Fund Type Tags */}
           <div className="flex flex-wrap gap-2">
             <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: 'var(--color-primary)', color: 'white' }}>
-              {fund.fundType}
+              {fundDetails?.fundType}
             </span>
             <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: 'var(--color-secondary)', color: 'white' }}>
-              {fund.categoryType}
+              {fundDetails?.categoryType}
             </span>
             <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: 'var(--color-success)', color: 'white' }}>
-              {fund.investmentType}
+              {fundDetails?.investmentType}
             </span>
             <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: 'var(--color-warning)', color: 'white' }}>
-              {fund.planType}
+              {fundDetails?.planType}
             </span>
             <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: 'var(--color-ring)', color: 'white' }}>
-              {fund.growthType}
+              {fundDetails?.growthType}
             </span>
           </div>
 
@@ -569,15 +573,15 @@ export default function FundDetailPage() {
             <div>
               <p className="text-sm mb-1" style={{ color: 'var(--color-muted-foreground)' }}>Min. Investment</p>
               <p className="text-lg font-bold" style={{ color: 'var(--color-foreground)' }}>
-                SIP {formatCurrency(fund.minInvestment)} • Lumpsum {formatCurrency(fund.lumpsum)}
+                SIP {formatCurrency(fundDetails?.minInvestment)} • Lumpsum {formatCurrency(fundDetails?.lumpsum)}
               </p>
             </div>
             <div className="text-right">
               <p className="text-sm mb-1" style={{ color: 'var(--color-muted-foreground)' }}>Rating</p>
               <div className="flex items-center space-x-1">
-                {renderStars(fund.rating)}
+                {renderStars(fundDetails?.rating)}
                 <span className="text-sm font-medium" style={{ color: 'var(--color-foreground)' }}>
-                  {fund.rating}
+                  {fundDetails?.rating}
                 </span>
               </div>
             </div>
@@ -591,7 +595,7 @@ export default function FundDetailPage() {
                 <span className="font-medium" style={{ color: 'var(--color-foreground)' }}>Returns</span>
               </div>
               <div className="text-right">
-                <span className="text-lg font-bold text-green-600">↗ {fund.returns.overall}%</span>
+                <span className="text-lg font-bold text-green-600">↗ {fundDetails?.returns.overall}%</span>
               </div>
             </div>
           </div>
@@ -605,10 +609,10 @@ export default function FundDetailPage() {
               </div>
               <div className="text-right">
                 <div className="flex items-center gap-2">
-                  <span className="text-lg font-bold" style={{ color: 'var(--color-foreground)' }}>₹{fund.nav.toFixed(3)}</span>
-                  <span className="text-sm font-medium text-green-600">↗ {fund.navChange}</span>
+                  <span className="text-lg font-bold" style={{ color: 'var(--color-foreground)' }}>₹{fundDetails?.nav.toFixed(3)}</span>
+                  <span className="text-sm font-medium text-green-600">↗ {fundDetails?.navChange}</span>
                 </div>
-                <p className="text-xs" style={{ color: 'var(--color-muted-foreground)' }}>as on {fund.navDate}</p>
+                <p className="text-xs" style={{ color: 'var(--color-muted-foreground)' }}>as on {fundDetails?.navDate}</p>
               </div>
             </div>
           </div>
@@ -621,10 +625,10 @@ export default function FundDetailPage() {
                 <span className="font-medium" style={{ color: 'var(--color-foreground)' }}>AUM</span>
               </div>
               <div className="text-right">
-                <span className="text-lg font-bold" style={{ color: 'var(--color-foreground)' }}>{formatAUM(fund.aum)}</span>
+                <span className="text-lg font-bold" style={{ color: 'var(--color-foreground)' }}>{formatAUM(fundDetails?.aum)}</span>
                 <div className="text-xs" style={{ color: 'var(--color-muted-foreground)' }}>
-                  <p>Since {fund.since}</p>
-                  <p>{fund.yearMonths}</p>
+                  <p>Since {fundDetails?.since}</p>
+                  <p>{fundDetails?.yearMonths}</p>
                 </div>
               </div>
             </div>
@@ -638,7 +642,7 @@ export default function FundDetailPage() {
             
             {/* Duration Selection Tabs */}
             <div className="flex gap-1 mb-4 p-1 rounded-lg" style={{ backgroundColor: 'var(--color-background)' }}>
-              {Object.keys(fund.returns).filter(key => key !== 'overall').map((duration) => (
+              {Object.keys(fundDetails?.returns).filter(key => key !== 'overall').map((duration) => (
                 <button
                   key={duration}
                   onClick={() => setSelectedDuration(duration)}
@@ -660,7 +664,7 @@ export default function FundDetailPage() {
             {/* Enhanced Graph Display */}
             <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--color-background)' }}>
               <EnhancedChart 
-                data={fund.historicalData[selectedDuration as keyof typeof fund.historicalData]} 
+                data={fundDetails?.historicalData[selectedDuration as keyof typeof fundDetails.historicalData]} 
                 duration={selectedDuration}
               />
             </div>
@@ -716,15 +720,15 @@ export default function FundDetailPage() {
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <span className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>Risk Level</span>
-              <span className="text-sm font-medium px-2 py-1 rounded-full" style={{ backgroundColor: getRiskColor(fund.riskLevel) + '20', color: getRiskColor(fund.riskLevel) }}>{fund.riskLevel}</span>
+              <span className="text-sm font-medium px-2 py-1 rounded-full" style={{ backgroundColor: getRiskColor(fundDetails?.riskLevel) + '20', color: getRiskColor(fundDetails?.riskLevel) }}>{fundDetails?.riskLevel}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>Expense Ratio</span>
-              <span className="text-sm font-medium" style={{ color: 'var(--color-foreground)' }}>{fund.expenseRatio}%</span>
+              <span className="text-sm font-medium" style={{ color: 'var(--color-foreground)' }}>{fundDetails?.expenseRatio}%</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>Fund Manager</span>
-              <span className="text-sm font-medium" style={{ color: 'var(--color-foreground)' }}>{fund.manager}</span>
+              <span className="text-sm font-medium" style={{ color: 'var(--color-foreground)' }}>{fundDetails?.manager}</span>
             </div>
           </div>
 
