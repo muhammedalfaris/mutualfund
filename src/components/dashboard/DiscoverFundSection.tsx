@@ -31,6 +31,20 @@ interface FundData {
   isTrending?: boolean;
 }
 
+interface ApiResponse {
+  success: boolean;
+  data: FundData[];
+  pagination: {
+    current_page: number;
+    total_pages: number;
+    total_records: number;
+    records_per_page: number;
+    has_next_page: boolean;
+    has_prev_page: boolean;
+  };
+  filters_applied: any;
+}
+
 const DiscoverFunds = () => {
   const { } = useTheme();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -41,20 +55,40 @@ const DiscoverFunds = () => {
   const [animatedCards, setAnimatedCards] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [fundsData, setFundsData] = useState<FundData[]>([]);
+  const [totalRecords, setTotalRecords] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(0);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
   const router = useRouter();
 
-  // Fetch funds data from API
+  // Debounced search effect
   useEffect(() => {
-    const fetchFunds = async () => {
-      try {
-        const response = await fetch('https://pl.pr.flashfund.in/Wyable/mutual-funds');
-        const data = await response.json();
-        
-        // Map API data to our UI structure
-        const mappedData = data.data.map((fund: FundData) => ({
+    const timeoutId = setTimeout(() => {
+      if (searchQuery.trim() !== '') {
+        performSearch();
+      } else {
+        // Reset to default view when search is cleared
+        fetchDefaultFunds();
+      }
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
+
+  // Fetch default funds (top 6 funds)
+  const fetchDefaultFunds = async () => {
+    setIsLoading(true);
+    setIsSearching(false);
+    try {
+      const response = await fetch('https://pl.pr.flashfund.in/Wyable/mutual-funds?limit=20');
+      const data: ApiResponse = await response.json();
+      
+      if (data.success) {
+        // Map API data to our UI structure and take top 6
+        const mappedData = data.data.slice(0, 6).map((fund: FundData) => ({
           ...fund,
           // Add UI-specific fields with default values
-          riskLevel: 'Moderate', // Default value since not in API
+          riskLevel: 'Moderate' as const, // Default value since not in API
           aum: 0, // Will show as N/A
           expenseRatio: 0, // Will show as N/A
           rating: 4.0, // Default rating
@@ -62,53 +96,126 @@ const DiscoverFunds = () => {
           isTopPick: Math.random() > 0.7, // Random top picks
           isNew: Math.random() > 0.8, // Random new funds
           isTrending: Math.random() > 0.6, // Random trending funds
-          // Map returns to match UI structure
-          returns: {
-            '1Y': fund.nav_1year_return,
-            '3Y': fund.nav_3year_return,
-            '5Y': fund.nav_5year_return
-          }
         }));
         
         setFundsData(mappedData);
-      } catch (error) {
-        console.error('Error fetching funds:', error);
-        // Fallback to dummy data if API fails
-        setFundsData([
-          {
-            _id: '1',
-            scheme_name: 'Axis Bluechip Fund',
-            scheme_type: 'EQUITY',
-            category: 'Large Cap',
-            nav_value: 45.67,
-            nav_1year_return: 18.5,
-            nav_3year_return: 15.2,
-            nav_5year_return: 12.8,
-            min_investment: 415000,
-            riskLevel: 'High',
-            aum: 3735000,
-            expenseRatio: 1.8,
-            rating: 4.5,
-            manager: 'Shreyash Devalkar',
-            isTopPick: true,
-            isNew: false,
-            isTrending: true,
-            scheme_code: 'AXBLUE',
-            isin: 'INF12345678',
-            amc_code: 'AXIS_MF',
-            fund_type: 'Open Ended',
-            scheme_plan: 'Growth',
-            settlement_type: 'T1'
-          },
-          // ... other fallback data
-        ]);
-      } finally {
-        setIsLoading(false);
+        setTotalRecords(data.pagination.total_records);
+        setCurrentPage(data.pagination.current_page);
+        setTotalPages(data.pagination.total_pages);
       }
-    };
+    } catch (error) {
+      console.error('Error fetching default funds:', error);
+      // Fallback to dummy data if API fails
+      setFundsData([
+        {
+          _id: '1',
+          scheme_name: 'Axis Bluechip Fund',
+          scheme_type: 'EQUITY',
+          category: 'Large Cap',
+          nav_value: 45.67,
+          nav_1year_return: 18.5,
+          nav_3year_return: 15.2,
+          nav_5year_return: 12.8,
+          min_investment: 415000,
+          riskLevel: 'High' as const,
+          aum: 3735000,
+          expenseRatio: 1.8,
+          rating: 4.5,
+          manager: 'Shreyash Devalkar',
+          isTopPick: true,
+          isNew: false,
+          isTrending: true,
+          scheme_code: 'AXBLUE',
+          isin: 'INF12345678',
+          amc_code: 'AXIS_MF',
+          fund_type: 'Open Ended',
+          scheme_plan: 'Growth',
+          settlement_type: 'T1'
+        },
+        // ... other fallback data
+      ]);
+      setTotalRecords(20);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    fetchFunds();
+  // Perform search with API
+  const performSearch = async () => {
+    if (searchQuery.trim() === '') return;
+    
+    setIsLoading(true);
+    setIsSearching(true);
+    try {
+      // Build query parameters
+      const params = new URLSearchParams({
+        search: searchQuery.trim(),
+        limit: '50' // Get more results for search
+      });
+
+      // Add scheme type filter if selected
+      if (selectedCategory !== 'all') {
+        params.append('scheme_type', selectedCategory);
+      }
+
+      // Add sorting if needed
+      if (sortBy !== 'rating') {
+        const sortMapping: { [key: string]: string } = {
+          'returns': 'nav_1year_return',
+          'nav': 'nav_value',
+          'min_investment': 'min_investment'
+        };
+        if (sortMapping[sortBy]) {
+          params.append('sort_by', sortMapping[sortBy]);
+          params.append('sort_order', 'desc');
+        }
+      }
+
+      const response = await fetch(`https://pl.pr.flashfund.in/Wyable/mutual-funds?${params}`);
+      const data: ApiResponse = await response.json();
+      
+      if (data.success) {
+        // Map API data to our UI structure
+        const mappedData = data.data.map((fund: FundData) => ({
+          ...fund,
+          // Add UI-specific fields with default values
+          riskLevel: 'Moderate' as const, // Default value since not in API
+          aum: 0, // Will show as N/A
+          expenseRatio: 0, // Will show as N/A
+          rating: 4.0, // Default rating
+          manager: 'N/A', // Not in API
+          isTopPick: Math.random() > 0.7, // Random top picks
+          isNew: Math.random() > 0.8, // Random new funds
+          isTrending: Math.random() > 0.6, // Random trending funds
+        }));
+        
+        setFundsData(mappedData);
+        setTotalRecords(data.pagination.total_records);
+        setCurrentPage(data.pagination.current_page);
+        setTotalPages(data.pagination.total_pages);
+      }
+    } catch (error) {
+      console.error('Error searching funds:', error);
+      setFundsData([]);
+      setTotalRecords(0);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch funds data on component mount
+  useEffect(() => {
+    fetchDefaultFunds();
   }, []);
+
+  // Handle category filter change
+  useEffect(() => {
+    if (searchQuery.trim() !== '') {
+      performSearch();
+    } else {
+      fetchDefaultFunds();
+    }
+  }, [selectedCategory, sortBy]);
 
   const categories = [
     { id: 'all', name: 'All Funds', icon: '📊' },
@@ -135,41 +242,16 @@ const DiscoverFunds = () => {
     return () => clearTimeout(timer);
   }, [fundsData]);
 
+  // Filter funds by risk level (client-side filtering since API doesn't support risk level)
   const filteredFunds = fundsData.filter(fund => {
-    const categoryMatch = selectedCategory === 'all' || fund.scheme_type === selectedCategory;
     const riskMatch = selectedRisk === 'all' || fund.riskLevel === selectedRisk;
-    const searchMatch = searchQuery === '' || 
-      fund.scheme_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (fund.manager && fund.manager.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      fund.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      fund.scheme_code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      fund.amc_code.toLowerCase().includes(searchQuery.toLowerCase());
-    return categoryMatch && riskMatch && searchMatch;
-  });
-
-  const sortedFunds = [...filteredFunds].sort((a, b) => {
-    switch (sortBy) {
-      case 'rating':
-        return (b.rating || 0) - (a.rating || 0);
-      case 'returns':
-        return (b.nav_1year_return || 0) - (a.nav_1year_return || 0);
-      case 'aum':
-        return (b.aum || 0) - (a.aum || 0);
-      case 'expense':
-        return (a.expenseRatio || 0) - (b.expenseRatio || 0);
-      case 'nav':
-        return b.nav_value - a.nav_value;
-      case 'min_investment':
-        return a.min_investment - b.min_investment;
-      default:
-        return 0;
-    }
+    return riskMatch;
   });
 
   // Show only 6 suggested funds when no search/filter is applied
-  const displayFunds = (searchQuery === '' && selectedCategory === 'all' && selectedRisk === 'all') 
-    ? sortedFunds.slice(0, 6) 
-    : sortedFunds;
+  const displayFunds = (!isSearching && selectedCategory === 'all' && selectedRisk === 'all') 
+    ? filteredFunds.slice(0, 6) 
+    : filteredFunds;
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -362,7 +444,8 @@ const DiscoverFunds = () => {
 
         <div className="flex items-end">
           <div className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>
-            {displayFunds.length} funds {(searchQuery === '' && selectedCategory === 'all' && selectedRisk === 'all') ? 'suggested' : 'found'}
+            {displayFunds.length} funds {isSearching ? 'found' : 'suggested'} 
+            {isSearching && totalRecords > 0 && ` (${totalRecords.toLocaleString()} total available)`}
           </div>
         </div>
       </div>
@@ -584,10 +667,10 @@ const DiscoverFunds = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="text-center">
             <p className="text-2xl font-bold" style={{ color: 'var(--color-primary)' }}>
-              {fundsData.length}
+              {totalRecords.toLocaleString()}
             </p>
             <p className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>
-              Total Funds
+              Total Funds Available
             </p>
           </div>
           <div className="text-center">
