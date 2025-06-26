@@ -42,7 +42,7 @@ interface ApiResponse {
     has_next_page: boolean;
     has_prev_page: boolean;
   };
-  filters_applied: any;
+  filters_applied: string;
 }
 
 const DiscoverFunds = () => {
@@ -102,6 +102,8 @@ const DiscoverFunds = () => {
         setTotalRecords(data.pagination.total_records);
         setCurrentPage(data.pagination.current_page);
         setTotalPages(data.pagination.total_pages);
+        console.log(currentPage);
+        console.log(totalPages);
       }
     } catch (error) {
       console.error('Error fetching default funds:', error);
