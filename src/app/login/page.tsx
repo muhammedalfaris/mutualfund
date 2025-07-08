@@ -66,17 +66,20 @@ export default function LoginPage() {
       }
 
       if (data.status === 'success' && data.tokens) {
-        // Store tokens securely
-        localStorage.setItem('accessToken', data.tokens.access);
-        localStorage.setItem('refreshToken', data.tokens.refresh);
-        
+        // Store tokens securely in sessionStorage only
+        sessionStorage.setItem('accessToken', data.tokens.access);
+        sessionStorage.setItem('refreshToken', data.tokens.refresh);
+        sessionStorage.setItem('username', formData.username);
+        // Remove from localStorage if present
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('username');
         // Store rememberMe preference
         if (formData.rememberMe) {
-          localStorage.setItem('rememberMe', 'true');
-        } else {
           sessionStorage.setItem('rememberMe', 'true');
+        } else {
+          sessionStorage.removeItem('rememberMe');
         }
-
         // Redirect to dashboard
         router.push('/dashboard');
       } else {

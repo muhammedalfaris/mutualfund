@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import { useRouter } from 'next/navigation';
 
@@ -13,14 +13,6 @@ const menuItems = [
   { name: 'Settings' },
 ];
 
-const mockUserData = {
-  fullName: "John Alexander Smith",
-  accountNumber: "****-****-****-2847",
-  memberSince: "January 2022",
-  accountType: "Premium Investor",
-  riskProfile: "Moderate",
-};
-
 interface NavbarProps {
   activeMenu?: string; // optional
 }
@@ -28,7 +20,15 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
   const { currentTheme, setTheme, availableThemes } = useTheme();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [userName, setUserName] = useState<string | null>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUsername = sessionStorage.getItem('username');
+      setUserName(storedUsername);
+    }
+  }, []);
 
   const menuRoutes: Record<string, string> = {
     Dashboard: '/dashboard',
@@ -38,7 +38,6 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
     Analytics: '/analytics',
     Settings: '/settings',
   };
-  // In the future, fetch user data here and use it instead of mockUserData
 
   return (
     <nav className="border-b px-4 lg:px-4 py-4 fixed top-0 left-0 right-0 z-50"
@@ -110,16 +109,16 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
               <div className="w-full h-full flex items-center justify-center"
                    style={{ backgroundColor: 'var(--color-primary)' }}>
                 <span className="text-sm font-medium" style={{ color: 'var(--color-background)' }}>
-                  {mockUserData.fullName.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase()}
+                  {userName ? userName.slice(0,2).toUpperCase() : 'JS'}
                 </span>
               </div>
             </div>
             <div className="hidden md:block">
               <p className="text-sm font-medium" style={{ color: 'var(--color-foreground)' }}>
-                {mockUserData.fullName.split(' ')[0]} {mockUserData.fullName.split(' ')[1] || ''}
+                {userName ? userName : 'John Smith'}
               </p>
               <p className="text-xs" style={{ color: 'var(--color-muted-foreground)' }}>
-                {mockUserData.accountType}
+                {/* Optionally show account type or other info here */}
               </p>
             </div>
           </div>

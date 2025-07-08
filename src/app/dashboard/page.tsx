@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import FundDonutChart from '@/components/dashboard/FundDonutChart';
 import DiscoverFunds from '@/components/dashboard/DiscoverFundSection';
 import Navbar from '@/components/dashboard/Navbar';
+import { useRouter } from 'next/navigation';
 
 interface PortfolioData {
   totalInvestment: number;
@@ -26,6 +27,7 @@ interface UserData {
 export default function Dashboard() {
   const { } = useTheme();
   const [isCardFlipped, setIsCardFlipped] = useState(false);
+  const router = useRouter();
 
   const portfolioData: PortfolioData = {
     totalInvestment: 10375000,
@@ -65,6 +67,16 @@ export default function Dashboard() {
   const formatPercentage = (percentage: number) => {
     return `${percentage > 0 ? '+' : ''}${percentage.toFixed(1)}%`;
   };
+
+  // Auth guard
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const token = sessionStorage.getItem('accessToken');
+      if (!token) {
+        router.replace('/login');
+      }
+    }
+  }, [router]);
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--color-background)' }}>
