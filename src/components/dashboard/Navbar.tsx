@@ -30,6 +30,10 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
   const [otp, setOtp] = useState('');
   const [otpError, setOtpError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [otpRef, setOtpRef] = useState('');
+  const [fetchingPortfolio, setFetchingPortfolio] = useState(false);
+  const [portfolioFetched, setPortfolioFetched] = useState(false);
+  const [fetchingTimeout, setFetchingTimeout] = useState<NodeJS.Timeout | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -83,6 +87,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
       if (data.success && data.status === 'otp_required' && data.data) {
         sessionStorage.setItem('casReqId', data.data.reqId);
         sessionStorage.setItem('casClientRefNo', data.data.clientRefNo);
+        setOtpRef(data.data.otpRef);
         setShowOtpForm(true);
       } else {
         setFormError('Failed to initiate CAS flow.');
@@ -94,19 +99,58 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
     }
   };
 
-  const handleOtpSubmit = (e: React.FormEvent) => {
+  const handleOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!otp.match(/^\d{6}$/)) {
       setOtpError('OTP must be 6 digits');
       return;
     }
     setOtpError(null);
-    // Next step: call OTP verification API here
-    setShowPortfolioModal(false);
-    setShowOtpForm(false);
-    setOtp('');
-    setPan('');
-    setPhone('');
+    setLoading(true);
+    try {
+      const token = sessionStorage.getItem('accessToken');
+      const reqId = sessionStorage.getItem('casReqId');
+      const clientRefNo = sessionStorage.getItem('casClientRefNo');
+      const response = await fetch('https://walletfree-api.nexcard.co.in/api/mfcentral/verify-otp/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          reqId: reqId,
+          otpRef: otpRef,
+          userSubjectReference: '',
+          clientRefNo: clientRefNo,
+          enteredOtp: otp,
+        }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        setFetchingPortfolio(true);
+        setShowOtpForm(false);
+        setLoading(false);
+        // Start loader for 33 seconds
+        const timeout = setTimeout(() => {
+          setFetchingPortfolio(false);
+          setPortfolioFetched(true);
+          setTimeout(() => {
+            setPortfolioFetched(false);
+            setShowPortfolioModal(false);
+            setOtp('');
+            setPan('');
+            setPhone('');
+          }, 2000);
+        }, 33000);
+        setFetchingTimeout(timeout);
+      } else {
+        setOtpError('OTP verification failed.');
+        setLoading(false);
+      }
+    } catch (err) {
+      setOtpError('Network or server error.');
+      setLoading(false);
+    }
   };
 
   return (
@@ -245,8 +289,41 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
       )}
 
       {/* Modal for Portfolio */}
-      <Modal isOpen={showPortfolioModal} onClose={() => { setShowPortfolioModal(false); setShowOtpForm(false); setOtp(''); setPan(''); setPhone(''); }} title={showOtpForm ? "Enter OTP" : "Portfolio Access"}>
-        {!showOtpForm ? (
+      <Modal isOpen={showPortfolioModal} onClose={() => { setShowPortfolioModal(false); setShowOtpForm(false); setOtp(''); setPan(''); setPhone(''); setFetchingPortfolio(false); setPortfolioFetched(false); if (fetchingTimeout) clearTimeout(fetchingTimeout); }} title={showOtpForm ? "Enter OTP" : fetchingPortfolio ? "Fetching Portfolio" : portfolioFetched ? "Portfolio Fetched" : "Portfolio Access"}>
+        {fetchingPortfolio ? (
+          <div className="flex flex-col items-center justify-center space-y-6 py-8">
+            <p className="text-lg font-medium mb-2" style={{ color: 'var(--color-foreground)' }}>
+              Your portfolio is now fetching...
+            </p>
+            {/* Unique loader animation */}
+            <div className="relative w-20 h-20 flex items-center justify-center">
+              <div className="absolute w-20 h-20 rounded-full border-4 border-[var(--color-primary)] border-dashed animate-spin-slow"></div>
+              <div className="absolute w-14 h-14 rounded-full border-4 border-[var(--color-secondary)] border-dashed animate-spin-reverse"></div>
+              <div className="absolute w-8 h-8 rounded-full border-4 border-[var(--color-accent)] border-dashed animate-spin"></div>
+              <div className="w-4 h-4 rounded-full bg-[var(--color-primary)]"></div>
+            </div>
+            <style jsx>{`
+              .animate-spin-slow {
+                animation: spin 2.5s linear infinite;
+              }
+              .animate-spin-reverse {
+                animation: spinReverse 3.5s linear infinite;
+              }
+              @keyframes spin {
+                100% { transform: rotate(360deg); }
+              }
+              @keyframes spinReverse {
+                100% { transform: rotate(-360deg); }
+              }
+            `}</style>
+          </div>
+        ) : portfolioFetched ? (
+          <div className="flex flex-col items-center justify-center space-y-6 py-8">
+            <p className="text-lg font-medium mb-2" style={{ color: 'var(--color-foreground)' }}>
+              Your portfolio is fetched!
+            </p>
+          </div>
+        ) : !showOtpForm ? (
           <form onSubmit={handlePortfolioSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-1" style={{ color: 'var(--color-foreground)' }}>PAN Number</label>
