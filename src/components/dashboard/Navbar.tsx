@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import { useRouter } from 'next/navigation';
+import Modal from '@/components/Modal';
 
 const menuItems = [
   { name: 'Dashboard' },
@@ -21,6 +22,10 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
   const { currentTheme, setTheme, availableThemes } = useTheme();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [userName, setUserName] = useState<string | null>(null);
+  const [showPortfolioModal, setShowPortfolioModal] = useState(false);
+  const [pan, setPan] = useState('');
+  const [phone, setPhone] = useState('');
+  const [formError, setFormError] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -37,6 +42,27 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
     Transactions: '/transactions',
     Analytics: '/analytics',
     Settings: '/settings',
+  };
+
+  const handlePortfolioClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setShowPortfolioModal(true);
+  };
+
+  const handlePortfolioSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Simple validation
+    if (!pan.match(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/i)) {
+      setFormError('Invalid PAN number');
+      return;
+    }
+    if (!phone.match(/^\d{10}$/)) {
+      setFormError('Invalid phone number');
+      return;
+    }
+    setFormError(null);
+    setShowPortfolioModal(false);
+    // You can handle the form data here (API call, etc)
   };
 
   return (
@@ -67,7 +93,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
                 backgroundColor: activeMenu === item.name ? 'var(--color-primary)' : 'transparent',
                 color: activeMenu === item.name ? 'var(--color-background)' : 'var(--color-foreground)',
               }}
-              onClick={() => router.push(menuRoutes[item.name] || '/')}
+              onClick={item.name === 'Portfolio' ? handlePortfolioClick : () => router.push(menuRoutes[item.name] || '/')}
             >
               <span>{item.name}</span>
             </button>
@@ -149,7 +175,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
                   backgroundColor: activeMenu === item.name ? 'var(--color-primary)' : 'transparent',
                   color: activeMenu === item.name ? 'var(--color-background)' : 'var(--color-foreground)',
                 }}
-                onClick={() => router.push(menuRoutes[item.name] || '/')}
+                onClick={item.name === 'Portfolio' ? handlePortfolioClick : () => router.push(menuRoutes[item.name] || '/')}
               >
                 <span className="text-sm">{item.name}</span>
               </button>
@@ -173,6 +199,46 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
           </select>
         </div>
       )}
+
+      {/* Modal for Portfolio */}
+      <Modal isOpen={showPortfolioModal} onClose={() => setShowPortfolioModal(false)} title="Portfolio Access">
+        <form onSubmit={handlePortfolioSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-1" style={{ color: 'var(--color-foreground)' }}>PAN Number</label>
+            <input
+              type="text"
+              value={pan}
+              onChange={e => setPan(e.target.value.toUpperCase())}
+              maxLength={10}
+              className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 transition-all"
+              style={{ backgroundColor: 'var(--color-input)', color: 'var(--color-foreground)', borderColor: 'var(--color-border)' }}
+              placeholder="ABCDE1234F"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1" style={{ color: 'var(--color-foreground)' }}>Phone Number</label>
+            <input
+              type="tel"
+              value={phone}
+              onChange={e => setPhone(e.target.value.replace(/[^0-9]/g, ''))}
+              maxLength={10}
+              className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 transition-all"
+              style={{ backgroundColor: 'var(--color-input)', color: 'var(--color-foreground)', borderColor: 'var(--color-border)' }}
+              placeholder="9876543210"
+              required
+            />
+          </div>
+          {formError && <div className="text-sm text-[var(--color-destructive)]">{formError}</div>}
+          <button
+            type="submit"
+            className="w-full py-2 rounded-lg font-medium text-white transition-all hover:opacity-90 disabled:opacity-50"
+            style={{ backgroundColor: 'var(--color-primary)' }}
+          >
+            Submit
+          </button>
+        </form>
+      </Modal>
     </nav>
   );
 };
