@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, } from "react";
 
 //Variation 1: Stock Chart Lines
 export default function AnimatedBg() {

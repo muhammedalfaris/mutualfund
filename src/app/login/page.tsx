@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useTheme } from '@/context/ThemeContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -307,7 +306,7 @@ export default function LoginPage() {
           {/* Sign Up Link */}
           <div className="text-center">
             <span className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>
-              Don't have an account?{' '}
+              Don&apos;t have an account?{' '}
               <Link 
                 href="/register" 
                 className="font-medium hover:underline transition-all"
