@@ -97,6 +97,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
       }
     } catch (err) {
       setFormError('Network or server error.');
+      console.log(err);
     } finally {
       setLoading(false);
     }
@@ -180,6 +181,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
             }
           } catch (err) {
             setFetchError('Network or server error while fetching portfolio.');
+            console.log(err);
           }
         }, 33000);
         setFetchingTimeout(timeout);
@@ -190,6 +192,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
     } catch (err) {
       setOtpError('Network or server error.');
       setLoading(false);
+      console.log(err);
     }
   };
 

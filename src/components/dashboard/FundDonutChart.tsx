@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import { usePortfolio, SchemeData } from '@/context/PortfolioContext';
 
-interface FundData {
-  name: string;
-  percentage: number;
-  amount: number;
-  color: string;
-  category: 'equity' | 'debt' | 'hybrid' | 'commodity';
-  logo: string;
-}
+// interface FundData {
+//   name: string;
+//   percentage: number;
+//   amount: number;
+//   color: string;
+//   category: 'equity' | 'debt' | 'hybrid' | 'commodity';
+//   logo: string;
+// }
 
 // Define a type for both real and dummy data
 interface FundChartData extends SchemeData {
