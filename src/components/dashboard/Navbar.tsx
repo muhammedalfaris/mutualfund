@@ -19,6 +19,22 @@ interface NavbarProps {
   activeMenu?: string; // optional
 }
 
+interface Scheme {
+  amc: string;
+  amcName: string;
+  schemeName: string;
+  currentMktValue: number | string;
+  costValue: number | string;
+  gainLoss: number | string;
+  gainLossPercentage: number | string;
+  assetType: string;
+}
+
+interface DataBlock {
+  schemes: Scheme[];
+  // add other properties if needed
+}
+
 const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
   const { currentTheme, setTheme, availableThemes } = useTheme();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -156,16 +172,18 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
             const docData = await docRes.json();
             if (docData.success && docData.data && Array.isArray(docData.data.data)) {
               // Flatten all schemes from all data blocks
-              const allSchemes = docData.data.data.flatMap((block: any) => block.schemes.map((scheme: any) => ({
-                amc: scheme.amc,
-                amcName: scheme.amcName,
-                schemeName: scheme.schemeName,
-                currentMktValue: Number(scheme.currentMktValue),
-                costValue: Number(scheme.costValue),
-                gainLoss: Number(scheme.gainLoss),
-                gainLossPercentage: Number(scheme.gainLossPercentage),
-                assetType: scheme.assetType,
-              })));
+              const allSchemes = (docData.data.data as DataBlock[]).flatMap((block) =>
+                block.schemes.map((scheme) => ({
+                  amc: scheme.amc,
+                  amcName: scheme.amcName,
+                  schemeName: scheme.schemeName,
+                  currentMktValue: Number(scheme.currentMktValue),
+                  costValue: Number(scheme.costValue),
+                  gainLoss: Number(scheme.gainLoss),
+                  gainLossPercentage: Number(scheme.gainLossPercentage),
+                  assetType: scheme.assetType,
+                }))
+              );
               setSchemes(allSchemes);
               setPortfolioFetched(true);
               setTimeout(() => {
