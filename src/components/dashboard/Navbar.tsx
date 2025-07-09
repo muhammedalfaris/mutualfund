@@ -4,13 +4,14 @@ import React, { useState, useEffect } from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import { useRouter } from 'next/navigation';
 import Modal from '@/components/Modal';
+import { usePortfolio } from '@/context/PortfolioContext';
 
 const menuItems = [
   { name: 'Dashboard' },
   { name: 'Portfolio' },
   { name: 'Investments' },
   { name: 'Transactions' },
-  { name: 'Analytics' },
+  // { name: 'Analytics' },
   { name: 'Settings' },
 ];
 
@@ -35,6 +36,8 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
   const [portfolioFetched, setPortfolioFetched] = useState(false);
   const [fetchingTimeout, setFetchingTimeout] = useState<NodeJS.Timeout | null>(null);
   const router = useRouter();
+  const { setSchemes } = usePortfolio();
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -48,7 +51,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
     Portfolio: '/portfolio',
     Investments: '/investments',
     Transactions: '/transactions',
-    Analytics: '/analytics',
+    // Analytics: '/analytics',
     Settings: '/settings',
   };
 
@@ -130,17 +133,54 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
         setFetchingPortfolio(true);
         setShowOtpForm(false);
         setLoading(false);
-        // Start loader for 33 seconds
-        const timeout = setTimeout(() => {
+        // Start loader for 33 seconds, then fetch real data
+        const timeout = setTimeout(async () => {
           setFetchingPortfolio(false);
-          setPortfolioFetched(true);
-          setTimeout(() => {
-            setPortfolioFetched(false);
-            setShowPortfolioModal(false);
-            setOtp('');
-            setPan('');
-            setPhone('');
-          }, 2000);
+          // Call CAS document API
+          try {
+            const token = sessionStorage.getItem('accessToken');
+            const reqId = sessionStorage.getItem('casReqId');
+            const clientRefNo = sessionStorage.getItem('casClientRefNo');
+            const docRes = await fetch('https://walletfree-api.nexcard.co.in/api/mfcentral/cas/document/', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                reqId: reqId,
+                clientRefNo: clientRefNo,
+              }),
+            });
+            const docData = await docRes.json();
+            if (docData.success && docData.data && Array.isArray(docData.data.data)) {
+              // Flatten all schemes from all data blocks
+              const allSchemes = docData.data.data.flatMap((block: any) => block.schemes.map((scheme: any) => ({
+                amc: scheme.amc,
+                amcName: scheme.amcName,
+                schemeName: scheme.schemeName,
+                currentMktValue: Number(scheme.currentMktValue),
+                costValue: Number(scheme.costValue),
+                gainLoss: Number(scheme.gainLoss),
+                gainLossPercentage: Number(scheme.gainLossPercentage),
+                assetType: scheme.assetType,
+              })));
+              setSchemes(allSchemes);
+              setPortfolioFetched(true);
+              setTimeout(() => {
+                setPortfolioFetched(false);
+                setShowPortfolioModal(false);
+                setOtp('');
+                setPan('');
+                setPhone('');
+                setFetchError(null);
+              }, 2000);
+            } else {
+              setFetchError('Failed to fetch portfolio data.');
+            }
+          } catch (err) {
+            setFetchError('Network or server error while fetching portfolio.');
+          }
         }, 33000);
         setFetchingTimeout(timeout);
       } else {
@@ -151,6 +191,11 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
       setOtpError('Network or server error.');
       setLoading(false);
     }
+  };
+
+  const handleLogout = () => {
+    sessionStorage.clear();
+    router.replace('/login');
   };
 
   return (
@@ -247,6 +292,18 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
                     d={isMobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
             </svg>
           </button>
+
+          {/* Logout Icon Desktop */}
+          <button
+            className="p-2 rounded-lg hover:opacity-70 transition-opacity"
+            style={{ color: 'var(--color-foreground)' }}
+            onClick={handleLogout}
+            title="Logout"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H7a2 2 0 01-2-2V7a2 2 0 012-2h4a2 2 0 012 2v1" />
+            </svg>
+          </button>
         </div>
       </div>
 
@@ -269,6 +326,19 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
               </button>
             ))}
           </div>
+          {/* Logout Icon Mobile */}
+          <div className="flex justify-end mb-2 pr-2">
+            <button
+              className="p-2 rounded-lg hover:opacity-70 transition-opacity"
+              style={{ color: 'var(--color-foreground)' }}
+              onClick={handleLogout}
+              title="Logout"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H7a2 2 0 01-2-2V7a2 2 0 012-2h4a2 2 0 012 2v1" />
+              </svg>
+            </button>
+          </div>
           <select
             value={currentTheme.name.toLowerCase()}
             onChange={(e) => setTheme(e.target.value)}
@@ -289,7 +359,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
       )}
 
       {/* Modal for Portfolio */}
-      <Modal isOpen={showPortfolioModal} onClose={() => { setShowPortfolioModal(false); setShowOtpForm(false); setOtp(''); setPan(''); setPhone(''); setFetchingPortfolio(false); setPortfolioFetched(false); if (fetchingTimeout) clearTimeout(fetchingTimeout); }} title={showOtpForm ? "Enter OTP" : fetchingPortfolio ? "Fetching Portfolio" : portfolioFetched ? "Portfolio Fetched" : "Portfolio Access"}>
+      <Modal isOpen={showPortfolioModal} onClose={() => { setShowPortfolioModal(false); setShowOtpForm(false); setOtp(''); setPan(''); setPhone(''); setFetchingPortfolio(false); setPortfolioFetched(false); setFetchError(null); if (fetchingTimeout) clearTimeout(fetchingTimeout); }} title={showOtpForm ? "Enter OTP" : fetchingPortfolio ? "Fetching Portfolio" : portfolioFetched ? "Portfolio Fetched" : "Portfolio Access"}>
         {fetchingPortfolio ? (
           <div className="flex flex-col items-center justify-center space-y-6 py-8">
             <p className="text-lg font-medium mb-2" style={{ color: 'var(--color-foreground)' }}>
@@ -302,6 +372,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
               <div className="absolute w-8 h-8 rounded-full border-4 border-[var(--color-accent)] border-dashed animate-spin"></div>
               <div className="w-4 h-4 rounded-full bg-[var(--color-primary)]"></div>
             </div>
+            {fetchError && <div className="text-sm text-[var(--color-destructive)]">{fetchError}</div>}
             <style jsx>{`
               .animate-spin-slow {
                 animation: spin 2.5s linear infinite;

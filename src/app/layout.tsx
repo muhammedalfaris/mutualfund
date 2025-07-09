@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/context/ThemeContext";
 import AnimatedBg from "@/components/AnimatedBg";
+import { PortfolioProvider } from '@/context/PortfolioContext';
+import AuthGuard from '@/components/AuthGuard';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -55,9 +57,11 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AnimatedBg />
-        <ThemeProvider>
-          {children}
-        </ThemeProvider>
+        <PortfolioProvider>
+          <ThemeProvider>
+            {children}
+          </ThemeProvider>
+        </PortfolioProvider>
       </body>
     </html>
   );

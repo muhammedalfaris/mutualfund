@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '@/context/ThemeContext';
+import { usePortfolio, SchemeData } from '@/context/PortfolioContext';
 
 interface FundData {
   name: string;
@@ -10,19 +11,49 @@ interface FundData {
   logo: string;
 }
 
+// Define a type for both real and dummy data
+interface FundChartData extends SchemeData {
+  color: string;
+  logo: string;
+  category: string;
+  percentage: number;
+  amount: number;
+}
+
 const FundDonutChart = () => {
   const { } = useTheme();
   const [hoveredFund, setHoveredFund] = useState<number | null>(null);
   const [animatedPercentages, setAnimatedPercentages] = useState<number[]>([]);
+  const { schemes } = usePortfolio();
 
-  const fundData: FundData[] = [
-    { name: 'Large Cap Equity', percentage: 35, amount: 4305625, color: '#3b82f6', category: 'equity', logo: 'https://via.placeholder.com/16x16/3b82f6/ffffff?text=LC' },
-    { name: 'Mid Cap Growth', percentage: 25, amount: 3076146, color: '#10b981', category: 'equity', logo: 'https://via.placeholder.com/16x16/10b981/ffffff?text=MC' },
-    { name: 'Debt Funds', percentage: 20, amount: 2460950, color: '#f59e0b', category: 'debt', logo: 'https://via.placeholder.com/16x16/f59e0b/ffffff?text=DF' },
-    { name: 'Small Cap', percentage: 12, amount: 1476570, color: '#ef4444', category: 'equity', logo: 'https://via.placeholder.com/16x16/ef4444/ffffff?text=SC' },
-    { name: 'Gold ETF', percentage: 5, amount: 615196, color: '#8b5cf6', category: 'commodity', logo: 'https://via.placeholder.com/16x16/8b5cf6/ffffff?text=GE' },
-    { name: 'Hybrid Balanced', percentage: 3, amount: 369018, color: '#06b6d4', category: 'hybrid', logo: 'https://via.placeholder.com/16x16/06b6d4/ffffff?text=HB' },
-  ];
+  // Use real data if available, otherwise fallback to dummy
+  let fundData: FundChartData[] = [];
+  if (schemes.length > 0) {
+    // Calculate total market value
+    const totalMktValue = schemes.reduce((sum, s) => sum + (s.currentMktValue || 0), 0);
+    fundData = schemes.map((scheme, i) => {
+      const colorList = [
+        '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#eab308', '#f472b6', '#6366f1', '#14b8a6', '#f43f5e', '#a3e635', '#f87171', '#facc15', '#38bdf8', '#fbbf24', '#a21caf', '#f59e42', '#0ea5e9', '#f43f5e'
+      ];
+      return {
+        ...scheme,
+        color: colorList[i % colorList.length],
+        logo: 'https://via.placeholder.com/16x16/3b82f6/ffffff?text=MF',
+        category: scheme.assetType?.toLowerCase() || 'other',
+        percentage: totalMktValue > 0 ? Math.round((scheme.currentMktValue / totalMktValue) * 100) : 0,
+        amount: scheme.currentMktValue,
+      };
+    });
+  } else {
+    fundData = [
+      { percentage: 35, amount: 4305625, color: '#3b82f6', category: 'equity', logo: 'https://via.placeholder.com/16x16/3b82f6/ffffff?text=LC', amc: '', amcName: '', schemeName: 'Large Cap Equity', currentMktValue: 4305625, costValue: 0, gainLoss: 0, gainLossPercentage: 0, assetType: 'equity' },
+      { percentage: 25, amount: 3076146, color: '#10b981', category: 'equity', logo: 'https://via.placeholder.com/16x16/10b981/ffffff?text=MC', amc: '', amcName: '', schemeName: 'Mid Cap Growth', currentMktValue: 3076146, costValue: 0, gainLoss: 0, gainLossPercentage: 0, assetType: 'equity' },
+      { percentage: 20, amount: 2460950, color: '#f59e0b', category: 'debt', logo: 'https://via.placeholder.com/16x16/f59e0b/ffffff?text=DF', amc: '', amcName: '', schemeName: 'Debt Funds', currentMktValue: 2460950, costValue: 0, gainLoss: 0, gainLossPercentage: 0, assetType: 'debt' },
+      { percentage: 12, amount: 1476570, color: '#ef4444', category: 'equity', logo: 'https://via.placeholder.com/16x16/ef4444/ffffff?text=SC', amc: '', amcName: '', schemeName: 'Small Cap', currentMktValue: 1476570, costValue: 0, gainLoss: 0, gainLossPercentage: 0, assetType: 'equity' },
+      { percentage: 5, amount: 615196, color: '#8b5cf6', category: 'commodity', logo: 'https://via.placeholder.com/16x16/8b5cf6/ffffff?text=GE', amc: '', amcName: '', schemeName: 'Gold ETF', currentMktValue: 615196, costValue: 0, gainLoss: 0, gainLossPercentage: 0, assetType: 'commodity' },
+      { percentage: 3, amount: 369018, color: '#06b6d4', category: 'hybrid', logo: 'https://via.placeholder.com/16x16/06b6d4/ffffff?text=HB', amc: '', amcName: '', schemeName: 'Hybrid Balanced', currentMktValue: 369018, costValue: 0, gainLoss: 0, gainLossPercentage: 0, assetType: 'hybrid' },
+    ];
+  }
 
   const totalAmount = fundData.reduce((sum, fund) => sum + fund.amount, 0);
 
@@ -32,7 +63,7 @@ const FundDonutChart = () => {
       setAnimatedPercentages(fundData.map(fund => fund.percentage));
     }, 100);
     return () => clearTimeout(timer);
-  }, []);
+  }, [fundData]);
 
   // Calculate SVG path for donut segments
   const createDonutPath = (percentage: number, startAngle: number, radius: number = 90, ) => {
@@ -104,7 +135,7 @@ const FundDonutChart = () => {
                 
                 return (
                   <path
-                    key={fund.name}
+                    key={fund.schemeName}
                     d={createDonutPath(animatedPercentages[index] || 0, currentAngle)}
                     fill="none"
                     stroke={fund.color}
@@ -152,7 +183,7 @@ const FundDonutChart = () => {
         <div className="space-y-4">
           {fundData.map((fund, index) => (
             <div
-              key={fund.name}
+              key={fund.schemeName}
               className={`p-4 rounded-xl border transition-all duration-300 cursor-pointer ${
                 hoveredFund === index ? 'shadow-lg scale-105' : 'hover:shadow-md'
               }`}
@@ -168,12 +199,12 @@ const FundDonutChart = () => {
                 <div className="flex items-center space-x-3">
                   <img 
                     src={fund.logo}
-                    alt={`${fund.name} logo`}
+                    alt={`${fund.schemeName} logo`}
                     className="w-5 h-5 rounded-full shadow-sm"
                   />
                   <div>
                     <p className="font-medium text-sm" style={{ color: 'var(--color-foreground)' }}>
-                      {fund.name}
+                      {fund.schemeName}
                     </p>
                     <p className="text-xs capitalize" 
                        style={{ color: 'var(--color-muted-foreground)' }}>

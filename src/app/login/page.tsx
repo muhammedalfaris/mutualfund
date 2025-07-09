@@ -21,7 +21,7 @@ interface ApiResponse {
 }
 
 export default function LoginPage() {
-  const { currentTheme, setTheme, availableThemes } = useTheme();
+  // const { currentTheme, setTheme, availableThemes } = useTheme();
   const router = useRouter();
   const [formData, setFormData] = useState<LoginFormData>({
     username: '',
@@ -148,7 +148,7 @@ export default function LoginPage() {
       {/* Right Side - Login Form */}
       <div className="w-full lg:w-1/2 flex flex-col justify-center px-8 py-2 lg:px-8 py-4">
         {/* Theme Selector */}
-        <div className="absolute top-6 right-6 z-20">
+        {/* <div className="absolute top-6 right-6 z-20">
           <select
             value={currentTheme.name.toLowerCase()}
             onChange={(e) => setTheme(e.target.value)}
@@ -165,7 +165,7 @@ export default function LoginPage() {
               </option>
             ))}
           </select>
-        </div>
+        </div> */}
 
         {/* Mobile Logo */}
         <div className="lg:hidden text-center mb-8">
