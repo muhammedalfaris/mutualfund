@@ -320,7 +320,7 @@ export default function LoginPage() {
 
         {/* Footer */}
         <div className="mt-12 text-center text-xs" style={{ color: 'var(--color-muted-foreground)' }}>
-          <p>© 2024 MF App. All rights reserved.</p>
+          <p>© 2025 MF App. All rights reserved.</p>
           <div className="mt-2 space-x-4">
             <Link href="#" className="hover:underline">Privacy Policy</Link>
             <Link href="#" className="hover:underline">Terms of Service</Link>
