@@ -13,8 +13,8 @@ interface PortfolioData {
   currentValue: number;
   totalGainLoss: number;
   gainLossPercentage: number;
-  todaysGainLoss: number;
-  availableBalance: number;
+  // todaysGainLoss: number;
+  // availableBalance: number;
 }
 
 interface UserData {
@@ -35,8 +35,8 @@ export default function Dashboard() {
     currentValue: 12304750,
     totalGainLoss: 1929750,
     gainLossPercentage: 18.6,
-    todaysGainLoss: 103750,
-    availableBalance: 1037500,
+    // todaysGainLoss: 103750,
+    // availableBalance: 1037500,
   };
 
   const userData: UserData = {
@@ -142,27 +142,37 @@ export default function Dashboard() {
                         <span className={`text-sm font-medium ${
                           portfolioData.totalGainLoss >= 0 ? 'text-green-300' : 'text-red-300'
                         }`}>
-                          {formatCurrency(portfolioData.totalGainLoss)} ({formatPercentage(portfolioData.gainLossPercentage)})
+                          {formatCurrency(portfolioData.totalGainLoss)} 
+                          {/* ({formatPercentage(portfolioData.gainLossPercentage)}) */}
                         </span>
                       </div>
 
-                      <div className="flex justify-between">
+                      {/* <div className="flex justify-between">
                         <span className="text-sm opacity-90">Today&apos;s Change</span>
                         <span className={`text-sm font-medium ${
                           portfolioData.todaysGainLoss >= 0 ? 'text-green-300' : 'text-red-300'
                         }`}>
                           {portfolioData.todaysGainLoss >= 0 ? '+' : ''}{formatCurrency(portfolioData.todaysGainLoss)}
                         </span>
+                      </div> */}
+                       <div className="flex justify-between">
+                        <span className="text-sm opacity-90">Returns</span>
+                        <span className={`text-sm font-medium ${
+                          portfolioData.gainLossPercentage >= 0 ? 'text-green-300' : 'text-red-300'
+                        }`}>
+                         {formatPercentage(portfolioData.gainLossPercentage)}
+                        </span>
                       </div>
                     </div>
+                    
 
-                    <div className="flex justify-between items-end">
-                      <div>
+                    <div className="flex justify-end">
+                      {/* <div>
                         <p className="text-xs opacity-70">Available Balance</p>
                         <p className="text-lg font-semibold">
                           {formatCurrency(portfolioData.availableBalance)}
                         </p>
-                      </div>
+                      </div> */}
                       <p className="text-xs opacity-70">Click to flip</p>
                     </div>
                   </div>

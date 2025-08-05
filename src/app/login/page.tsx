@@ -12,6 +12,9 @@ interface LoginFormData {
 
 interface ApiResponse {
   status: string;
+  role?: string;
+  pan?: string;
+  name?: string;
   tokens?: {
     refresh: string;
     access: string;
@@ -65,10 +68,15 @@ export default function LoginPage() {
       }
 
       if (data.status === 'success' && data.tokens) {
-        // Store tokens securely in sessionStorage only
         sessionStorage.setItem('accessToken', data.tokens.access);
         sessionStorage.setItem('refreshToken', data.tokens.refresh);
         sessionStorage.setItem('username', formData.username);
+        const basicDetails = {
+          name: data.name || '',
+          pan: data.pan || '',
+          role: data.role || ''
+        };
+        sessionStorage.setItem('basicDetails', JSON.stringify(basicDetails));
         // Remove from localStorage if present
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
@@ -280,7 +288,6 @@ export default function LoginPage() {
               </Link>
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={isLoading}
@@ -303,7 +310,6 @@ export default function LoginPage() {
             <div className="flex-1 h-px" style={{ backgroundColor: 'var(--color-border)' }}></div>
           </div>
 
-          {/* Sign Up Link */}
           <div className="text-center">
             <span className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>
               Don&apos;t have an account?{' '}
@@ -318,7 +324,6 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Footer */}
         <div className="mt-12 text-center text-xs" style={{ color: 'var(--color-muted-foreground)' }}>
           <p>© 2025 MF App. All rights reserved.</p>
           <div className="mt-2 space-x-4">
@@ -329,7 +334,6 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Custom Styles */}
       <style jsx>{`
         @keyframes pulse {
           0%, 100% { transform: scale(1); }

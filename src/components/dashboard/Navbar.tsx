@@ -57,8 +57,10 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const storedUsername = sessionStorage.getItem('username');
-      setUserName(storedUsername);
+      const storedBasicDetails = JSON.parse(sessionStorage.getItem('basicDetails') || '{}');
+      setUserName(storedBasicDetails.name || null);
+      setPan(storedBasicDetails.pan || '');
+      setPhone(storedBasicDetails.phone || '');
     }
   }, []);
 
@@ -201,7 +203,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
             setFetchError('Network or server error while fetching portfolio.');
             console.log(err);
           }
-        }, 33000);
+        }, 20000);
         setFetchingTimeout(timeout);
       } else {
         setOtpError('OTP verification failed.');
@@ -272,7 +274,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
             ))}
           </select>
 
-          <button className="p-2 rounded-lg hover:opacity-70 transition-opacity relative"
+          {/* <button className="p-2 rounded-lg hover:opacity-70 transition-opacity relative"
                   style={{ color: 'var(--color-foreground)' }}>
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -281,7 +283,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
             <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full"
                   style={{ backgroundColor: 'var(--color-destructive)' }}>
             </span>
-          </button>
+          </button> */}
 
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-full overflow-hidden border-2"
