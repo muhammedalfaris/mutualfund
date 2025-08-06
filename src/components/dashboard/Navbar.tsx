@@ -28,10 +28,77 @@ interface Scheme {
   gainLoss: number | string;
   gainLossPercentage: number | string;
   assetType: string;
+  // Additional properties from external API
+  age?: number;
+  nav?: number | string;
+  isin?: string;
+  folio?: string;
+  mobile?: string;
+  isDemat?: string;
+  navDate?: string;
+  rtaName?: string;
+  planMode?: string;
+  schemeCode?: string;
+  schemeType?: string;
+  investorName?: string;
+  schemeOption?: string;
+  availableUnits?: number | string;
+  closingBalance?: number | string;
+  availableAmount?: number | string;
+  lienEligibleUnits?: number | string;
+  transactionSource?: string;
 }
 
 interface DataBlock {
   schemes: Scheme[];
+}
+
+// New interfaces for external data
+interface PortfolioItem {
+  isDemat: string;
+  costValue: string;
+  currentMktValue: string;
+  gainLoss: string;
+  gainLossPercentage: string;
+}
+
+interface ExtSchemeData {
+  success: boolean;
+  pan: string;
+  full_response: {
+    data: DataBlock[];
+    portfolio: PortfolioItem[];
+  };
+  fetched_at: string;
+}
+
+interface ProcessedScheme {
+  amc: string;
+  amcName: string;
+  schemeName: string;
+  currentMktValue: number;
+  costValue: number;
+  gainLoss: number;
+  gainLossPercentage: number;
+  assetType: string;
+  age?: number;
+  nav: number;
+  isin?: string;
+  folio?: string;
+  mobile?: string;
+  isDemat?: string;
+  navDate?: string;
+  rtaName?: string;
+  planMode?: string;
+  schemeCode?: string;
+  schemeType?: string;
+  investorName?: string;
+  schemeOption?: string;
+  availableUnits: number;
+  closingBalance: number;
+  availableAmount: number;
+  lienEligibleUnits: number;
+  transactionSource?: string;
 }
 
 const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
@@ -222,14 +289,14 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
   };
 
   // Add processExternalData and fetchExternalSchemes (copied from dashboard)
-  const processExternalData = (extSchemeData: any) => {
+  const processExternalData = (extSchemeData: ExtSchemeData) => {
     try {
       if (!extSchemeData.success || !extSchemeData.full_response?.data) {
         console.warn('Invalid external scheme data structure');
         return;
       }
       const fullResponse = extSchemeData.full_response;
-      const nonDematPortfolio = fullResponse.portfolio?.find((p: any) => p.isDemat === "N");
+      const nonDematPortfolio = fullResponse.portfolio?.find((p: PortfolioItem) => p.isDemat === "N");
       if (nonDematPortfolio) {
         const summary = {
           totalInvestment: parseFloat(nonDematPortfolio.costValue) || 0,
@@ -239,21 +306,21 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
         };
         setPortfolioSummary(summary);
       }
-      const allSchemes: any[] = [];
-      fullResponse.data.forEach((dataBlock: any) => {
+      const allSchemes: ProcessedScheme[] = [];
+      fullResponse.data.forEach((dataBlock: DataBlock) => {
         if (dataBlock.schemes && Array.isArray(dataBlock.schemes)) {
-          dataBlock.schemes.forEach((scheme: any) => {
+          dataBlock.schemes.forEach((scheme: Scheme) => {
             allSchemes.push({
               amc: scheme.amc || '',
               amcName: scheme.amcName || '',
               schemeName: scheme.schemeName || '',
-              currentMktValue: parseFloat(scheme.currentMktValue) || 0,
-              costValue: parseFloat(scheme.costValue) || 0,
-              gainLoss: parseFloat(scheme.gainLoss) || 0,
-              gainLossPercentage: parseFloat(scheme.gainLossPercentage) || 0,
+              currentMktValue: parseFloat(scheme.currentMktValue.toString()) || 0,
+              costValue: parseFloat(scheme.costValue.toString()) || 0,
+              gainLoss: parseFloat(scheme.gainLoss.toString()) || 0,
+              gainLossPercentage: parseFloat(scheme.gainLossPercentage.toString()) || 0,
               assetType: scheme.assetType?.toLowerCase() || 'other',
               age: scheme.age,
-              nav: parseFloat(scheme.nav) || 0,
+              nav: parseFloat(scheme.nav?.toString() || '0') || 0,
               isin: scheme.isin,
               folio: scheme.folio,
               mobile: scheme.mobile,
@@ -265,10 +332,10 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
               schemeType: scheme.schemeType,
               investorName: scheme.investorName,
               schemeOption: scheme.schemeOption,
-              availableUnits: parseFloat(scheme.availableUnits) || 0,
-              closingBalance: parseFloat(scheme.closingBalance) || 0,
-              availableAmount: parseFloat(scheme.availableAmount) || 0,
-              lienEligibleUnits: parseFloat(scheme.lienEligibleUnits) || 0,
+              availableUnits: parseFloat(scheme.availableUnits?.toString() || '0') || 0,
+              closingBalance: parseFloat(scheme.closingBalance?.toString() || '0') || 0,
+              availableAmount: parseFloat(scheme.availableAmount?.toString() || '0') || 0,
+              lienEligibleUnits: parseFloat(scheme.lienEligibleUnits?.toString() || '0') || 0,
               transactionSource: scheme.transactionSource,
             });
           });
