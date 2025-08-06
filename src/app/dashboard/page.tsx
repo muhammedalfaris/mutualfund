@@ -28,6 +28,7 @@ interface UserData {
 export default function Dashboard() {
   const { } = useTheme();
   const [isCardFlipped, setIsCardFlipped] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const portfolioData: PortfolioData = {
@@ -69,12 +70,66 @@ export default function Dashboard() {
     return `${percentage > 0 ? '+' : ''}${percentage.toFixed(1)}%`;
   };
 
-  // Auth guard
+  // Function to fetch external schemes data
+  const fetchExternalSchemes = async (pan: string) => {
+    try {
+      setIsLoading(true);
+      const token = sessionStorage.getItem('accessToken');
+      const response = await fetch(`https://walletfree-api.nexcard.co.in/api/mfcentral/casresponse/?pan=${pan}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      // Store the response in session storage
+      sessionStorage.setItem('extScheme', JSON.stringify(data));
+      
+      console.log('External schemes data fetched and stored successfully:', data);
+      return data;
+    } catch (error) {
+      console.error('Error fetching external schemes:', error);
+      // You might want to show a toast notification or handle the error appropriately
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Auth guard and API call on initial load
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const token = sessionStorage.getItem('accessToken');
       if (!token) {
         router.replace('/login');
+        return;
+      }
+
+      // Check if external schemes data already exists to avoid unnecessary API calls
+      const existingExtScheme = sessionStorage.getItem('extScheme');
+      if (!existingExtScheme) {
+        // Get PAN from basic details
+        const basicDetailsStr = sessionStorage.getItem('basicDetails');
+        if (basicDetailsStr) {
+          try {
+            const basicDetails = JSON.parse(basicDetailsStr);
+            const pan = basicDetails.pan;
+            
+            if (pan) {
+              fetchExternalSchemes(pan);
+            } else {
+              console.warn('PAN not found in basic details');
+            }
+          } catch (error) {
+            console.error('Error parsing basic details:', error);
+          }
+        } else {
+          console.warn('Basic details not found in session storage');
+        }
       }
     }
   }, [router]);
@@ -91,6 +146,7 @@ export default function Dashboard() {
             </h2>
             <p style={{ color: 'var(--color-muted-foreground)' }}>
               Here&apos;s your portfolio performance overview
+              {isLoading && <span className="ml-2 text-sm">(Loading external data...)</span>}
             </p>
           </div>
 
@@ -145,7 +201,7 @@ export default function Dashboard() {
                           {formatCurrency(portfolioData.totalGainLoss)} 
                           {/* ({formatPercentage(portfolioData.gainLossPercentage)}) */}
                         </span>
-                      </div>
+                      </div>  
 
                       {/* <div className="flex justify-between">
                         <span className="text-sm opacity-90">Today&apos;s Change</span>

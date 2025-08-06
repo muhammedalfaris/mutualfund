@@ -32,7 +32,6 @@ interface Scheme {
 
 interface DataBlock {
   schemes: Scheme[];
-  // add other properties if needed
 }
 
 const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
@@ -152,7 +151,6 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
         setFetchingPortfolio(true);
         setShowOtpForm(false);
         setLoading(false);
-        // Start loader for 33 seconds, then fetch real data
         const timeout = setTimeout(async () => {
           setFetchingPortfolio(false);
           // Call CAS document API
