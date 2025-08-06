@@ -17,6 +17,29 @@ interface UserData {
   riskProfile: string;
 }
 
+// New interfaces for external data
+interface PortfolioItem {
+  isDemat: string;
+  costValue: string;
+  currentMktValue: string;
+  gainLoss: string;
+  gainLossPercentage: string;
+}
+
+interface DataBlock {
+  schemes: SchemeData[];
+}
+
+interface ExtSchemeData {
+  success: boolean;
+  pan: string;
+  full_response: {
+    data: DataBlock[];
+    portfolio: PortfolioItem[];
+  };
+  fetched_at: string;
+}
+
 export default function Dashboard() {
   const { } = useTheme();
   const [isCardFlipped, setIsCardFlipped] = useState(false);
@@ -83,7 +106,7 @@ export default function Dashboard() {
   };
 
   // Function to process external schemes data
-  const processExternalData = (extSchemeData: any) => {
+  const processExternalData = (extSchemeData: ExtSchemeData) => {
     try {
       if (!extSchemeData.success || !extSchemeData.full_response?.data) {
         console.warn('Invalid external scheme data structure');
@@ -93,7 +116,7 @@ export default function Dashboard() {
       const fullResponse = extSchemeData.full_response;
       
       // Process portfolio summary from portfolio array where isDemat is "N"
-      const nonDematPortfolio = fullResponse.portfolio?.find((p: any) => p.isDemat === "N");
+      const nonDematPortfolio = fullResponse.portfolio?.find((p: PortfolioItem) => p.isDemat === "N");
       if (nonDematPortfolio) {
         const summary: PortfolioSummary = {
           totalInvestment: parseFloat(nonDematPortfolio.costValue) || 0,
@@ -107,21 +130,21 @@ export default function Dashboard() {
 
       // Process schemes data
       const allSchemes: SchemeData[] = [];
-      fullResponse.data.forEach((dataBlock: any) => {
+      fullResponse.data.forEach((dataBlock: DataBlock) => {
         if (dataBlock.schemes && Array.isArray(dataBlock.schemes)) {
-          dataBlock.schemes.forEach((scheme: any) => {
+          dataBlock.schemes.forEach((scheme: SchemeData) => {
             const processedScheme: SchemeData = {
               amc: scheme.amc || '',
               amcName: scheme.amcName || '',
               schemeName: scheme.schemeName || '',
-              currentMktValue: parseFloat(scheme.currentMktValue) || 0,
-              costValue: parseFloat(scheme.costValue) || 0,
-              gainLoss: parseFloat(scheme.gainLoss) || 0,
-              gainLossPercentage: parseFloat(scheme.gainLossPercentage) || 0,
+              currentMktValue: parseFloat(scheme.currentMktValue.toString()) || 0,
+              costValue: parseFloat(scheme.costValue.toString()) || 0,
+              gainLoss: parseFloat(scheme.gainLoss.toString()) || 0,
+              gainLossPercentage: parseFloat(scheme.gainLossPercentage.toString()) || 0,
               assetType: scheme.assetType?.toLowerCase() || 'other',
               // Additional fields
               age: scheme.age,
-              nav: parseFloat(scheme.nav) || 0,
+              nav: parseFloat(scheme.nav?.toString() || '0') || 0,
               isin: scheme.isin,
               folio: scheme.folio,
               mobile: scheme.mobile,
@@ -133,10 +156,10 @@ export default function Dashboard() {
               schemeType: scheme.schemeType,
               investorName: scheme.investorName,
               schemeOption: scheme.schemeOption,
-              availableUnits: parseFloat(scheme.availableUnits) || 0,
-              closingBalance: parseFloat(scheme.closingBalance) || 0,
-              availableAmount: parseFloat(scheme.availableAmount) || 0,
-              lienEligibleUnits: parseFloat(scheme.lienEligibleUnits) || 0,
+              availableUnits: parseFloat(scheme.availableUnits?.toString() || '0') || 0,
+              closingBalance: parseFloat(scheme.closingBalance?.toString() || '0') || 0,
+              availableAmount: parseFloat(scheme.availableAmount?.toString() || '0') || 0,
+              lienEligibleUnits: parseFloat(scheme.lienEligibleUnits?.toString() || '0') || 0,
               transactionSource: scheme.transactionSource,
             };
             allSchemes.push(processedScheme);
