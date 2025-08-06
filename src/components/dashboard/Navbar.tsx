@@ -51,7 +51,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
   const [portfolioFetched, setPortfolioFetched] = useState(false);
   const [fetchingTimeout, setFetchingTimeout] = useState<NodeJS.Timeout | null>(null);
   const router = useRouter();
-  const { setSchemes } = usePortfolio();
+  const { setSchemes, setPortfolioSummary, setIsLoading: setPortfolioLoading } = usePortfolio();
   const [fetchError, setFetchError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -75,6 +75,16 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
   const handlePortfolioClick = (e: React.MouseEvent) => {
     e.preventDefault();
     setShowPortfolioModal(true);
+    setIsMobileMenuOpen(false); // Close mobile menu after clicking Portfolio
+  };
+
+  const handleMobileMenuClick = (itemName: string) => {
+    if (itemName === 'Portfolio') {
+      setShowPortfolioModal(true);
+    } else {
+      router.push(menuRoutes[itemName] || '/');
+    }
+    setIsMobileMenuOpen(false); // Close mobile menu after any selection
   };
 
   const handlePortfolioSubmit = async (e: React.FormEvent) => {
@@ -84,12 +94,16 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
       setFormError('Invalid PAN number');
       return;
     }
-    if (!phone.match(/^\d{10}$/)) {
+    if (!phone.match(/^[0-9]{10}$/)) {
       setFormError('Invalid phone number');
       return;
     }
     setFormError(null);
     setLoading(true);
+    // Store PAN in session for one-time use if not already present
+    if (!sessionStorage.getItem('basicDetails')) {
+      sessionStorage.setItem('basicDetails', JSON.stringify({ pan, phone }));
+    }
     try {
       const token = sessionStorage.getItem('accessToken');
       const response = await fetch('https://walletfree-api.nexcard.co.in/api/mfcentral/initiate/', {
@@ -171,7 +185,8 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
             });
             const docData = await docRes.json();
             if (docData.success && docData.data && Array.isArray(docData.data.data)) {
-              // Just show success, don't populate the data
+              // Call the real external portfolio API and store extScheme in session
+              await fetchExternalSchemes(pan);
               setPortfolioFetched(true);
               setTimeout(() => {
                 setPortfolioFetched(false);
@@ -204,6 +219,88 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
   const handleLogout = () => {
     sessionStorage.clear();
     router.replace('/login');
+  };
+
+  // Add processExternalData and fetchExternalSchemes (copied from dashboard)
+  const processExternalData = (extSchemeData: any) => {
+    try {
+      if (!extSchemeData.success || !extSchemeData.full_response?.data) {
+        console.warn('Invalid external scheme data structure');
+        return;
+      }
+      const fullResponse = extSchemeData.full_response;
+      const nonDematPortfolio = fullResponse.portfolio?.find((p: any) => p.isDemat === "N");
+      if (nonDematPortfolio) {
+        const summary = {
+          totalInvestment: parseFloat(nonDematPortfolio.costValue) || 0,
+          currentValue: parseFloat(nonDematPortfolio.currentMktValue) || 0,
+          totalGainLoss: parseFloat(nonDematPortfolio.gainLoss) || 0,
+          gainLossPercentage: parseFloat(nonDematPortfolio.gainLossPercentage) || 0,
+        };
+        setPortfolioSummary(summary);
+      }
+      const allSchemes: any[] = [];
+      fullResponse.data.forEach((dataBlock: any) => {
+        if (dataBlock.schemes && Array.isArray(dataBlock.schemes)) {
+          dataBlock.schemes.forEach((scheme: any) => {
+            allSchemes.push({
+              amc: scheme.amc || '',
+              amcName: scheme.amcName || '',
+              schemeName: scheme.schemeName || '',
+              currentMktValue: parseFloat(scheme.currentMktValue) || 0,
+              costValue: parseFloat(scheme.costValue) || 0,
+              gainLoss: parseFloat(scheme.gainLoss) || 0,
+              gainLossPercentage: parseFloat(scheme.gainLossPercentage) || 0,
+              assetType: scheme.assetType?.toLowerCase() || 'other',
+              age: scheme.age,
+              nav: parseFloat(scheme.nav) || 0,
+              isin: scheme.isin,
+              folio: scheme.folio,
+              mobile: scheme.mobile,
+              isDemat: scheme.isDemat,
+              navDate: scheme.navDate,
+              rtaName: scheme.rtaName,
+              planMode: scheme.planMode,
+              schemeCode: scheme.schemeCode,
+              schemeType: scheme.schemeType,
+              investorName: scheme.investorName,
+              schemeOption: scheme.schemeOption,
+              availableUnits: parseFloat(scheme.availableUnits) || 0,
+              closingBalance: parseFloat(scheme.closingBalance) || 0,
+              availableAmount: parseFloat(scheme.availableAmount) || 0,
+              lienEligibleUnits: parseFloat(scheme.lienEligibleUnits) || 0,
+              transactionSource: scheme.transactionSource,
+            });
+          });
+        }
+      });
+      setSchemes(allSchemes);
+    } catch (error) {
+      console.error('Error processing external data:', error);
+    }
+  };
+
+  const fetchExternalSchemes = async (pan: string) => {
+    try {
+      setPortfolioLoading(true);
+      const token = sessionStorage.getItem('accessToken');
+      const response = await fetch(`https://walletfree-api.nexcard.co.in/api/mfcentral/casresponse/?pan=${pan}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      sessionStorage.setItem('extScheme', JSON.stringify(data));
+      processExternalData(data);
+      return data;
+    } catch (error) {
+      console.error('Error fetching external schemes:', error);
+    } finally {
+      setPortfolioLoading(false);
+    }
   };
 
   return (
@@ -328,7 +425,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
                   backgroundColor: activeMenu === item.name ? 'var(--color-primary)' : 'transparent',
                   color: activeMenu === item.name ? 'var(--color-background)' : 'var(--color-foreground)',
                 }}
-                onClick={item.name === 'Portfolio' ? handlePortfolioClick : () => router.push(menuRoutes[item.name] || '/')}
+                onClick={() => handleMobileMenuClick(item.name)}
               >
                 <span className="text-sm">{item.name}</span>
               </button>

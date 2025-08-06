@@ -7,15 +7,7 @@ import DiscoverFunds from '@/components/dashboard/DiscoverFundSection';
 import Navbar from '@/components/dashboard/Navbar';
 import { useRouter } from 'next/navigation';
 import AuthGuard from '@/components/AuthGuard';
-
-interface PortfolioData {
-  totalInvestment: number;
-  currentValue: number;
-  totalGainLoss: number;
-  gainLossPercentage: number;
-  // todaysGainLoss: number;
-  // availableBalance: number;
-}
+import { usePortfolio, PortfolioSummary, SchemeData } from '@/context/PortfolioContext';
 
 interface UserData {
   fullName: string;
@@ -29,19 +21,39 @@ export default function Dashboard() {
   const { } = useTheme();
   const [isCardFlipped, setIsCardFlipped] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [userName, setUserName] = useState<string>('User');
   const router = useRouter();
+  const { setSchemes, setPortfolioSummary, setIsLoading: setPortfolioLoading, portfolioSummary } = usePortfolio();
 
-  const portfolioData: PortfolioData = {
-    totalInvestment: 10375000,
-    currentValue: 12304750,
-    totalGainLoss: 1929750,
-    gainLossPercentage: 18.6,
-    // todaysGainLoss: 103750,
-    // availableBalance: 1037500,
+  // Default portfolio data (will be overridden by external data)
+  const defaultPortfolioData: PortfolioSummary = {
+    totalInvestment: 0,
+    currentValue: 0,
+    totalGainLoss: 0,
+    gainLossPercentage: 0,
   };
 
+  const [portfolioData, setPortfolioData] = useState<PortfolioSummary>(defaultPortfolioData);
+
+  useEffect(() => {
+    if (portfolioSummary) {
+      setPortfolioData(portfolioSummary);
+    } else {
+      setPortfolioData(defaultPortfolioData);
+    }
+  }, [portfolioSummary]);
+
+  // Get user name from session storage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedBasicDetails = JSON.parse(sessionStorage.getItem('basicDetails') || '{}');
+      const name = storedBasicDetails.name || 'User';
+      setUserName(name);
+    }
+  }, []);
+
   const userData: UserData = {
-    fullName: "John Alexander Smith",
+    fullName: userName,
     accountNumber: "****-****-****-2847",
     memberSince: "January 2022",
     accountType: "Premium Investor",
@@ -70,10 +82,80 @@ export default function Dashboard() {
     return `${percentage > 0 ? '+' : ''}${percentage.toFixed(1)}%`;
   };
 
+  // Function to process external schemes data
+  const processExternalData = (extSchemeData: any) => {
+    try {
+      if (!extSchemeData.success || !extSchemeData.full_response?.data) {
+        console.warn('Invalid external scheme data structure');
+        return;
+      }
+
+      const fullResponse = extSchemeData.full_response;
+      
+      // Process portfolio summary from portfolio array where isDemat is "N"
+      const nonDematPortfolio = fullResponse.portfolio?.find((p: any) => p.isDemat === "N");
+      if (nonDematPortfolio) {
+        const summary: PortfolioSummary = {
+          totalInvestment: parseFloat(nonDematPortfolio.costValue) || 0,
+          currentValue: parseFloat(nonDematPortfolio.currentMktValue) || 0,
+          totalGainLoss: parseFloat(nonDematPortfolio.gainLoss) || 0,
+          gainLossPercentage: parseFloat(nonDematPortfolio.gainLossPercentage) || 0,
+        };
+        setPortfolioData(summary);
+        setPortfolioSummary(summary);
+      }
+
+      // Process schemes data
+      const allSchemes: SchemeData[] = [];
+      fullResponse.data.forEach((dataBlock: any) => {
+        if (dataBlock.schemes && Array.isArray(dataBlock.schemes)) {
+          dataBlock.schemes.forEach((scheme: any) => {
+            const processedScheme: SchemeData = {
+              amc: scheme.amc || '',
+              amcName: scheme.amcName || '',
+              schemeName: scheme.schemeName || '',
+              currentMktValue: parseFloat(scheme.currentMktValue) || 0,
+              costValue: parseFloat(scheme.costValue) || 0,
+              gainLoss: parseFloat(scheme.gainLoss) || 0,
+              gainLossPercentage: parseFloat(scheme.gainLossPercentage) || 0,
+              assetType: scheme.assetType?.toLowerCase() || 'other',
+              // Additional fields
+              age: scheme.age,
+              nav: parseFloat(scheme.nav) || 0,
+              isin: scheme.isin,
+              folio: scheme.folio,
+              mobile: scheme.mobile,
+              isDemat: scheme.isDemat,
+              navDate: scheme.navDate,
+              rtaName: scheme.rtaName,
+              planMode: scheme.planMode,
+              schemeCode: scheme.schemeCode,
+              schemeType: scheme.schemeType,
+              investorName: scheme.investorName,
+              schemeOption: scheme.schemeOption,
+              availableUnits: parseFloat(scheme.availableUnits) || 0,
+              closingBalance: parseFloat(scheme.closingBalance) || 0,
+              availableAmount: parseFloat(scheme.availableAmount) || 0,
+              lienEligibleUnits: parseFloat(scheme.lienEligibleUnits) || 0,
+              transactionSource: scheme.transactionSource,
+            };
+            allSchemes.push(processedScheme);
+          });
+        }
+      });
+
+      setSchemes(allSchemes);
+      console.log('Processed external data:', { schemes: allSchemes });
+    } catch (error) {
+      console.error('Error processing external data:', error);
+    }
+  };
+
   // Function to fetch external schemes data
   const fetchExternalSchemes = async (pan: string) => {
     try {
       setIsLoading(true);
+      setPortfolioLoading(true);
       const token = sessionStorage.getItem('accessToken');
       const response = await fetch(`https://walletfree-api.nexcard.co.in/api/mfcentral/casresponse/?pan=${pan}`, {
         headers: {
@@ -90,13 +172,17 @@ export default function Dashboard() {
       // Store the response in session storage
       sessionStorage.setItem('extScheme', JSON.stringify(data));
       
-      console.log('External schemes data fetched and stored successfully:', data);
+      // Process the data
+      processExternalData(data);
+      
+      console.log('External schemes data fetched and processed successfully:', data);
       return data;
     } catch (error) {
       console.error('Error fetching external schemes:', error);
       // You might want to show a toast notification or handle the error appropriately
     } finally {
       setIsLoading(false);
+      setPortfolioLoading(false);
     }
   };
 
@@ -109,10 +195,17 @@ export default function Dashboard() {
         return;
       }
 
-      // Check if external schemes data already exists to avoid unnecessary API calls
+      // Check if external schemes data already exists
       const existingExtScheme = sessionStorage.getItem('extScheme');
-      if (!existingExtScheme) {
-        // Get PAN from basic details
+      if (existingExtScheme) {
+        try {
+          const extSchemeData = JSON.parse(existingExtScheme);
+          processExternalData(extSchemeData);
+        } catch (error) {
+          console.error('Error parsing existing external scheme data:', error);
+        }
+      } else {
+        // Get PAN from basic details and fetch data
         const basicDetailsStr = sessionStorage.getItem('basicDetails');
         if (basicDetailsStr) {
           try {
@@ -142,7 +235,7 @@ export default function Dashboard() {
         <main className="max-w-7xl mx-auto px-4 mt-20 lg:px-6 py-8">
           <div className="mb-8">
             <h2 className="text-3xl font-bold mb-2" style={{ color: 'var(--color-foreground)' }}>
-              Welcome back, John
+              Welcome back, {userName}
             </h2>
             <p style={{ color: 'var(--color-muted-foreground)' }}>
               Here&apos;s your portfolio performance overview
