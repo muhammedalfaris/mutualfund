@@ -111,7 +111,7 @@ const FundDonutChart = () => {
         </p>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-8 items-center">
+     <div className="flex flex-col gap-8">
         
         {/* Donut Chart */}
         <div className="relative flex justify-center">

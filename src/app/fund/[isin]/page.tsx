@@ -113,7 +113,7 @@ export default function FundDetailPage() {
     const fetchDetails = async () => {
       try {
         const [detailsRes, navRes] = await Promise.all([
-          fetch(`https://pl.pr.flashfund.in/schemedetails/scheme/detail/${isin}`),
+          fetch(`https://pl-pre-prod.onrender.com/schemedetails/scheme/detail/${isin}`),
           fetch(`https://vyable-be.onrender.com/scheme/nav-history/?isin=${isin}`)
         ]);
         const detailsData = await detailsRes.json();

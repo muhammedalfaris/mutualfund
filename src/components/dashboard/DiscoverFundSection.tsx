@@ -80,7 +80,7 @@ const DiscoverFunds = () => {
     setIsLoading(true);
     setIsSearching(false);
     try {
-      const response = await fetch('https://pl.pr.flashfund.in/Wyable/mutual-funds?limit=20');
+      const response = await fetch('https://pl-pre-prod.onrender.com/Wyable/mutual-funds?limit=20');
       const data: ApiResponse = await response.json();
       
       if (data.success) {
@@ -173,7 +173,7 @@ const DiscoverFunds = () => {
         }
       }
 
-      const response = await fetch(`https://pl.pr.flashfund.in/Wyable/mutual-funds?${params}`);
+      const response = await fetch(`https://pl-pre-prod.onrender.com/Wyable/mutual-funds?${params}`);
       const data: ApiResponse = await response.json();
       
       if (data.success) {
