@@ -171,20 +171,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
             });
             const docData = await docRes.json();
             if (docData.success && docData.data && Array.isArray(docData.data.data)) {
-              // Flatten all schemes from all data blocks
-              const allSchemes = (docData.data.data as DataBlock[]).flatMap((block) =>
-                block.schemes.map((scheme) => ({
-                  amc: scheme.amc,
-                  amcName: scheme.amcName,
-                  schemeName: scheme.schemeName,
-                  currentMktValue: Number(scheme.currentMktValue),
-                  costValue: Number(scheme.costValue),
-                  gainLoss: Number(scheme.gainLoss),
-                  gainLossPercentage: Number(scheme.gainLossPercentage),
-                  assetType: scheme.assetType,
-                }))
-              );
-              setSchemes(allSchemes);
+              // Just show success, don't populate the data
               setPortfolioFetched(true);
               setTimeout(() => {
                 setPortfolioFetched(false);

@@ -213,9 +213,14 @@ const FundDonutChart = () => {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold text-sm" style={{ color: 'var(--color-foreground)' }}>
-                    {formatCurrency(fund.amount)}
-                  </p>
+                  <div className="space-y-1">
+                    <p className="font-semibold text-sm" style={{ color: 'var(--color-foreground)' }}>
+                      {formatCurrency(fund.amount)}
+                    </p>
+                    <p className="text-xs" style={{ color: 'var(--color-muted-foreground)' }}>
+                      Invested: {formatCurrency(fund.costValue)}
+                    </p>
+                  </div>
                   <div className="w-16 h-1 bg-gray-200 rounded-full mt-1 overflow-hidden">
                     <div 
                       className="h-full rounded-full transition-all duration-1000 ease-out"
