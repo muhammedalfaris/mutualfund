@@ -1140,3 +1140,299 @@ export default function AnimatedBg() {
 //     />
 //   );
 // }
+
+// Variation 3: Stock Life Journey - Complete Market Cycles
+// export default function AnimatedBg() {
+//   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+//   useEffect(() => {
+//     const canvas = canvasRef.current;
+//     if (!canvas) return;
+//     const ctx = canvas.getContext("2d");
+//     if (!ctx) return;
+
+//     let width = window.innerWidth;
+//     let height = window.innerHeight;
+//     canvas.width = width;
+//     canvas.height = height;
+
+//     const getColor = () =>
+//       getComputedStyle(document.documentElement).getPropertyValue("--color-primary") || "#dc2626";
+
+//     interface Candle {
+//       x: number;
+//       open: number;
+//       high: number;
+//       low: number;
+//       close: number;
+//       bullish: boolean;
+//     }
+
+//     // Define market phases that a typical investor experiences
+//     const marketPhases = [
+//       { name: 'early_investment', duration: 80, trend: 0.2, volatility: 0.8 },
+//       { name: 'first_bull_run', duration: 120, trend: 1.2, volatility: 1.0 },
+//       { name: 'correction', duration: 40, trend: -0.8, volatility: 1.5 },
+//       { name: 'recovery', duration: 60, trend: 0.6, volatility: 1.2 },
+//       { name: 'major_bull', duration: 150, trend: 1.5, volatility: 1.1 },
+//       { name: 'market_crash', duration: 30, trend: -2.0, volatility: 2.5 },
+//       { name: 'bear_market', duration: 80, trend: -0.4, volatility: 1.8 },
+//       { name: 'slow_recovery', duration: 100, trend: 0.3, volatility: 1.3 },
+//       { name: 'new_bull', duration: 140, trend: 1.0, volatility: 1.0 },
+//       { name: 'maturity', duration: 120, trend: 0.4, volatility: 0.9 }
+//     ];
+
+//     // Create multiple investment journeys
+//     const investmentJourneys = Array.from({ length: 3 }, (_, i) => ({
+//       candles: [] as Candle[],
+//       currentPhaseIndex: 0,
+//       phaseProgress: 0,
+//       basePrice: height * (0.3 + i * 0.25),
+//       currentPrice: height * (0.3 + i * 0.25),
+//       startingPrice: height * (0.3 + i * 0.25),
+//       totalProgress: 0,
+//       opacity: 0.2 + i * 0.15,
+//       candleWidth: 4 + i * 2,
+//       speed: 1.5 + i * 0.5,
+//       journeyComplete: false,
+//       restartDelay: i * 200, // Stagger restarts
+//       pauseFrames: 0
+//     }));
+
+//     const totalCandles = marketPhases.reduce((sum, phase) => sum + phase.duration, 0);
+//     const candleSpacing = Math.max(3, width / (totalCandles + 50));
+//     let animationFrame = 0;
+
+//     function getCurrentPhase(journey: any) {
+//       if (journey.currentPhaseIndex >= marketPhases.length) {
+//         return null;
+//       }
+//       return marketPhases[journey.currentPhaseIndex];
+//     }
+
+//     function generateRealisticCandle(journey: any, x: number): Candle {
+//       const phase = getCurrentPhase(journey);
+//       if (!phase) return null!;
+
+//       const open = journey.currentPrice;
+      
+//       // Calculate phase-based movement
+//       const phaseProgress = journey.phaseProgress / phase.duration;
+//       const trendIntensity = phase.trend * (1 - Math.abs(phaseProgress - 0.5) * 0.5); // Peak in middle of phase
+      
+//       // Add realistic randomness
+//       const randomComponent = (Math.random() - 0.5) * phase.volatility * 8;
+//       const trendComponent = trendIntensity * (0.5 + Math.random() * 1.5);
+      
+//       // Mean reversion to prevent extreme moves
+//       const distanceFromBase = (journey.currentPrice - journey.basePrice) / journey.basePrice;
+//       const meanReversion = -distanceFromBase * 2;
+      
+//       const priceMove = trendComponent + randomComponent + meanReversion;
+//       const close = open + priceMove;
+      
+//       // Generate realistic high/low
+//       const bodySize = Math.abs(close - open);
+//       const wickSize = bodySize * (0.3 + Math.random() * 1.2);
+      
+//       let high, low;
+//       if (close > open) {
+//         // Bullish candle
+//         high = close + Math.random() * wickSize;
+//         low = open - Math.random() * wickSize * 0.7;
+//       } else {
+//         // Bearish candle
+//         high = open + Math.random() * wickSize * 0.7;
+//         low = close - Math.random() * wickSize;
+//       }
+      
+//       journey.currentPrice = close;
+      
+//       return {
+//         x,
+//         open,
+//         high,
+//         low,
+//         close,
+//         bullish: close > open
+//       };
+//     }
+
+//     function drawCandle(candle: Candle, candleWidth: number, opacity: number) {
+//       if (!ctx || !candle) return;
+      
+//       const bodyTop = Math.min(candle.open, candle.close);
+//       const bodyBottom = Math.max(candle.open, candle.close);
+//       const bodyHeight = Math.max(0.5, bodyBottom - bodyTop);
+      
+//       const bullishColor = '#10b981';
+//       const bearishColor = '#ef4444';
+//       const color = candle.bullish ? bullishColor : bearishColor;
+      
+//       // Draw wick
+//       ctx.globalAlpha = opacity * 0.8;
+//       ctx.strokeStyle = color;
+//       ctx.lineWidth = 1;
+//       ctx.beginPath();
+//       ctx.moveTo(candle.x, candle.high);
+//       ctx.lineTo(candle.x, candle.low);
+//       ctx.stroke();
+      
+//       // Draw body
+//       if (candle.bullish) {
+//         // Bullish - hollow
+//         ctx.globalAlpha = opacity * 0.4;
+//         ctx.fillStyle = color;
+//         ctx.fillRect(candle.x - candleWidth/2, bodyTop, candleWidth, bodyHeight);
+//         ctx.globalAlpha = opacity;
+//         ctx.strokeStyle = color;
+//         ctx.lineWidth = 1.5;
+//         ctx.strokeRect(candle.x - candleWidth/2, bodyTop, candleWidth, bodyHeight);
+//       } else {
+//         // Bearish - filled
+//         ctx.globalAlpha = opacity;
+//         ctx.fillStyle = color;
+//         ctx.fillRect(candle.x - candleWidth/2, bodyTop, candleWidth, bodyHeight);
+//       }
+//     }
+
+//     function drawPhaseLabel(journey: any, journeyIndex: number) {
+//       if (!ctx) return;
+//       const phase = getCurrentPhase(journey);
+//       if (!phase || journey.candles.length === 0) return;
+      
+//       const lastCandle = journey.candles[journey.candles.length - 1];
+//       if (!lastCandle || lastCandle.x < width * 0.7) return;
+      
+//       const labels: Record<string, string> = {
+//         'early_investment': 'Starting Out',
+//         'first_bull_run': 'First Bull Run',
+//         'correction': 'Market Correction',
+//         'recovery': 'Recovery Phase',
+//         'major_bull': 'Bull Market',
+//         'market_crash': 'Market Crash',
+//         'bear_market': 'Bear Market',
+//         'slow_recovery': 'Rebuilding',
+//         'new_bull': 'New Growth',
+//         'maturity': 'Portfolio Maturity'
+//       };
+      
+//       ctx.globalAlpha = journey.opacity * 0.6;
+//       ctx.fillStyle = getColor();
+//       ctx.font = `${10 + journeyIndex * 2}px system-ui`;
+//       ctx.textAlign = 'right';
+      
+//       const label = labels[phase.name] || phase.name;
+//       const y = journey.basePrice - (journeyIndex * 25) - 15;
+//       ctx.fillText(label, width - 20, y);
+//     }
+
+//     function animate() {
+//       if (!ctx) return;
+//       ctx.clearRect(0, 0, width, height);
+//       animationFrame++;
+
+//       investmentJourneys.forEach((journey, journeyIndex) => {
+//         // Handle journey completion and restart
+//         if (journey.journeyComplete) {
+//           journey.pauseFrames++;
+//           if (journey.pauseFrames > journey.restartDelay) {
+//             // Restart journey
+//             journey.candles = [];
+//             journey.currentPhaseIndex = 0;
+//             journey.phaseProgress = 0;
+//             journey.currentPrice = journey.startingPrice;
+//             journey.totalProgress = 0;
+//             journey.journeyComplete = false;
+//             journey.pauseFrames = 0;
+//           }
+//           return;
+//         }
+
+//         // Generate new candles based on speed
+//         if (animationFrame % Math.max(1, Math.floor(4 / journey.speed)) === 0) {
+//           const phase = getCurrentPhase(journey);
+//           if (phase) {
+//             const candleX = journey.candles.length * candleSpacing + 50;
+//             const newCandle = generateRealisticCandle(journey, candleX);
+            
+//             if (newCandle) {
+//               journey.candles.push(newCandle);
+//               journey.phaseProgress++;
+//               journey.totalProgress++;
+              
+//               // Move to next phase
+//               if (journey.phaseProgress >= phase.duration) {
+//                 journey.currentPhaseIndex++;
+//                 journey.phaseProgress = 0;
+                
+//                 // Check if journey complete
+//                 if (journey.currentPhaseIndex >= marketPhases.length) {
+//                   journey.journeyComplete = true;
+//                 }
+//               }
+//             }
+//           }
+//         }
+
+//         // Draw all candles for this journey
+//         journey.candles.forEach(candle => {
+//           drawCandle(candle, journey.candleWidth, journey.opacity);
+//         });
+
+//         // Draw phase label
+//         drawPhaseLabel(journey, journeyIndex);
+        
+//         // Draw portfolio value indicator
+//         if (journey.candles.length > 0 && ctx) {
+//           const latestCandle = journey.candles[journey.candles.length - 1];
+//           const valueChange = ((latestCandle.close - journey.startingPrice) / journey.startingPrice) * 100;
+          
+//           ctx.globalAlpha = journey.opacity;
+//           ctx.fillStyle = valueChange >= 0 ? '#10b981' : '#ef4444';
+//           ctx.font = `${8 + journeyIndex}px system-ui`;
+//           ctx.textAlign = 'left';
+//           ctx.fillText(
+//             `${valueChange >= 0 ? '+' : ''}${valueChange.toFixed(1)}%`, 
+//             20, 
+//             journey.basePrice + (journeyIndex * 15)
+//           );
+//         }
+//       });
+
+//       requestAnimationFrame(animate);
+//     }
+
+//     animate();
+
+//     const handleResize = () => {
+//       width = window.innerWidth;
+//       height = window.innerHeight;
+//       canvas.width = width;
+//       canvas.height = height;
+      
+//       // Restart all journeys on resize
+//       investmentJourneys.forEach((journey, i) => {
+//         journey.basePrice = height * (0.3 + i * 0.25);
+//         journey.startingPrice = height * (0.3 + i * 0.25);
+//         journey.currentPrice = height * (0.3 + i * 0.25);
+//         journey.candles = [];
+//         journey.currentPhaseIndex = 0;
+//         journey.phaseProgress = 0;
+//         journey.journeyComplete = false;
+//       });
+//     };
+    
+//     window.addEventListener("resize", handleResize);
+//     return () => window.removeEventListener("resize", handleResize);
+//   }, []);
+
+//   return (
+//     <canvas
+//       ref={canvasRef}
+//       className="fixed inset-0 w-full h-full pointer-events-none z-0"
+//       style={{ position: "fixed", top: 0, left: 0, zIndex: 0 }}
+//       aria-hidden
+//     />
+//   );
+// }

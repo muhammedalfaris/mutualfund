@@ -8,6 +8,7 @@ import Navbar from '@/components/dashboard/Navbar';
 import { useRouter } from 'next/navigation';
 import AuthGuard from '@/components/AuthGuard';
 import { usePortfolio, PortfolioSummary, SchemeData } from '@/context/PortfolioContext';
+import Logo from '@/components/Logo';
 
 interface UserData {
   fullName: string;
@@ -295,9 +296,7 @@ export default function Dashboard() {
                         </h3>
                       </div>
                       <div className="text-right">
-                        <div className="w-12 h-8 bg-[#C0C0C0] bg-opacity-20 rounded flex items-center justify-center">
-                          <span className="text-sm font-bold">MF</span>
-                        </div>
+                        <Logo size="md" style={{ backgroundColor: 'var(--color-muted)', color: 'white', opacity:'20' }} />
                       </div>
                     </div>
 
@@ -366,9 +365,7 @@ export default function Dashboard() {
                         <h3 className="text-xl font-bold">{userData.fullName}</h3>
                       </div>
                       <div className="text-right">
-                        <div className="w-12 h-8 bg-white bg-opacity-20 rounded flex items-center justify-center">
-                          <span className="text-xs font-bold">MF</span>
-                        </div>
+                        <Logo size="md" style={{ backgroundColor: 'var(--color-muted)', color: 'white' }} />
                       </div>
                     </div>
 

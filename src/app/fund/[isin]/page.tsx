@@ -4,6 +4,7 @@ import Navbar from '@/components/dashboard/Navbar';
 import { useTheme } from '@/context/ThemeContext';
 import { useRouter, useParams } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
+import Logo from '@/components/Logo';
 
 type ChartPoint = { date: string; value: number };
 type Sector = { name: string; percentage: number; color: string };
@@ -574,9 +575,7 @@ export default function FundDetailPage() {
 
           {/* Fund Name and Logo */}
           <div className="flex items-center space-x-4">
-            <div className="w-8 h-8 rounded border flex items-center justify-center text-white font-bold text-sm" style={{ backgroundColor: getCategoryColor(fundDetails?.category) }}>
-              AB
-            </div>
+            <Logo size="sm" context={fundDetails?.category} style={{ backgroundColor: getCategoryColor(fundDetails?.category), color: 'white' }} />
             <div>
               <h2 className="text-xl font-bold" style={{ color: 'var(--color-foreground)' }}>{fundDetails?.name}</h2>
             </div>

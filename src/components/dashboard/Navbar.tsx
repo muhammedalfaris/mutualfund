@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useTheme } from '@/context/ThemeContext';
+// import { useTheme } from '@/context/ThemeContext';
 import { useRouter } from 'next/navigation';
 import Modal from '@/components/Modal';
 import { usePortfolio } from '@/context/PortfolioContext';
+import Logo from '@/components/Logo';
 
 const menuItems = [
   { name: 'Dashboard' },
@@ -102,7 +103,7 @@ interface ProcessedScheme {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
-  const { currentTheme, setTheme, availableThemes } = useTheme();
+  // const { currentTheme, setTheme, availableThemes } = useTheme();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [userName, setUserName] = useState<string | null>(null);
   const [showPortfolioModal, setShowPortfolioModal] = useState(false);
@@ -375,16 +376,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
          style={{ backgroundColor: 'var(--color-muted)', borderColor: 'var(--color-border)' }}>
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         <div className="flex items-center space-x-2">
-          <div className="w-10 h-10 rounded-lg flex items-center justify-center"
-               style={{ backgroundColor: 'var(--color-primary)' }}>
-            <span className="text-xl font-bold" style={{ color: 'var(--color-background)' }}>
-              MF
-            </span>
-          </div>
-          <h1 className="text-xl font-bold hidden sm:block"
-              style={{ color: 'var(--color-foreground)' }}>
-            Investment Portal
-          </h1>
+          <Logo size="lg" variant="full" style={{ backgroundColor: 'transparent'}} />
         </div>
 
         <div className="hidden lg:flex items-center space-x-8">
@@ -406,7 +398,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
         </div>
 
         <div className="flex items-center space-x-4">
-          <select
+          {/* <select
             value={currentTheme.name.toLowerCase()}
             onChange={(e) => setTheme(e.target.value)}
             className="px-3 py-2 text-sm rounded-lg border transition-colors hidden sm:block"
@@ -421,7 +413,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
                 {theme.charAt(0).toUpperCase() + theme.slice(1)}
               </option>
             ))}
-          </select>
+          </select> */}
 
           {/* <button className="p-2 rounded-lg hover:opacity-70 transition-opacity relative"
                   style={{ color: 'var(--color-foreground)' }}>
@@ -511,7 +503,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
               </svg>
             </button>
           </div>
-          <select
+          {/* <select
             value={currentTheme.name.toLowerCase()}
             onChange={(e) => setTheme(e.target.value)}
             className="w-full px-3 py-2 text-sm rounded-lg border transition-colors"
@@ -526,7 +518,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
                 {theme.charAt(0).toUpperCase() + theme.slice(1)} Theme
               </option>
             ))}
-          </select>
+          </select> */}
         </div>
       )}
 

@@ -64,9 +64,30 @@ export const themes: Record<string, Theme> = {
       warningForeground: '#ffffff',
     },
   },
+  ones : {
+    name: 'Ones',
+    colors: {
+      primary: '#c71c4e',               
+      secondary: '#1f1f1f',             
+      accent: '#ffffff',                
+      background: '#ffffff',            
+      foreground: '#111111',            
+      muted: '#f9dbe3',                 
+      mutedForeground: '#6b6b6b',       
+      border: '#e4e4e7',                
+      input: '#ffffff',                 
+      ring: '#c71c4e',                  
+      destructive: '#dc2626',           
+      destructiveForeground: '#ffffff', 
+      success: '#16a34a',               
+      successForeground: '#ffffff',     
+      warning: '#f59e0b',               
+      warningForeground: '#ffffff',     
+    },
+  }
 };
 
-export const ACTIVE_THEME = 'corporate'; 
+export const ACTIVE_THEME = 'ones'; 
 
 export const getActiveTheme = (): Theme => {
   return themes[ACTIVE_THEME] || themes.default;

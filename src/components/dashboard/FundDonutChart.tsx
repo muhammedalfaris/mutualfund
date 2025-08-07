@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import { usePortfolio, SchemeData } from '@/context/PortfolioContext';
+import Logo from '@/components/Logo';
 
 // Define a type for both real and dummy data
 interface FundChartData extends SchemeData {
@@ -29,7 +30,7 @@ const FundDonutChart = () => {
       return {
         ...scheme,
         color: colorList[i % colorList.length],
-        logo: 'https://via.placeholder.com/16x16/3b82f6/ffffff?text=MF',
+        logo: '', // We'll use Logo component instead
         category: scheme.assetType?.toLowerCase() || 'other',
         percentage: totalMktValue > 0 ? Math.round((scheme.currentMktValue / totalMktValue) * 100) : 0,
         amount: scheme.currentMktValue,
@@ -38,12 +39,12 @@ const FundDonutChart = () => {
   } else {
     // Fallback to dummy data when no real data is available
     fundData = [
-      { percentage: 35, amount: 4305625, color: '#3b82f6', category: 'equity', logo: 'https://via.placeholder.com/16x16/3b82f6/ffffff?text=LC', amc: '', amcName: '', schemeName: 'Large Cap Equity', currentMktValue: 4305625, costValue: 4000000, gainLoss: 305625, gainLossPercentage: 7.6, assetType: 'equity' },
-      { percentage: 25, amount: 3076146, color: '#10b981', category: 'equity', logo: 'https://via.placeholder.com/16x16/10b981/ffffff?text=MC', amc: '', amcName: '', schemeName: 'Mid Cap Growth', currentMktValue: 3076146, costValue: 2800000, gainLoss: 276146, gainLossPercentage: 9.9, assetType: 'equity' },
-      { percentage: 20, amount: 2460950, color: '#f59e0b', category: 'debt', logo: 'https://via.placeholder.com/16x16/f59e0b/ffffff?text=DF', amc: '', amcName: '', schemeName: 'Debt Funds', currentMktValue: 2460950, costValue: 2400000, gainLoss: 60950, gainLossPercentage: 2.5, assetType: 'debt' },
-      { percentage: 12, amount: 1476570, color: '#ef4444', category: 'equity', logo: 'https://via.placeholder.com/16x16/ef4444/ffffff?text=SC', amc: '', amcName: '', schemeName: 'Small Cap', currentMktValue: 1476570, costValue: 1200000, gainLoss: 276570, gainLossPercentage: 23.0, assetType: 'equity' },
-      { percentage: 5, amount: 615196, color: '#8b5cf6', category: 'commodity', logo: 'https://via.placeholder.com/16x16/8b5cf6/ffffff?text=GE', amc: '', amcName: '', schemeName: 'Gold ETF', currentMktValue: 615196, costValue: 600000, gainLoss: 15196, gainLossPercentage: 2.5, assetType: 'commodity' },
-      { percentage: 3, amount: 369018, color: '#06b6d4', category: 'hybrid', logo: 'https://via.placeholder.com/16x16/06b6d4/ffffff?text=HB', amc: '', amcName: '', schemeName: 'Hybrid Balanced', currentMktValue: 369018, costValue: 350000, gainLoss: 19018, gainLossPercentage: 5.4, assetType: 'hybrid' },
+      { percentage: 35, amount: 4305625, color: '#3b82f6', category: 'equity', logo: '', amc: '', amcName: '', schemeName: 'Large Cap Equity', currentMktValue: 4305625, costValue: 4000000, gainLoss: 305625, gainLossPercentage: 7.6, assetType: 'equity' },
+      { percentage: 25, amount: 3076146, color: '#10b981', category: 'equity', logo: '', amc: '', amcName: '', schemeName: 'Mid Cap Growth', currentMktValue: 3076146, costValue: 2800000, gainLoss: 276146, gainLossPercentage: 9.9, assetType: 'equity' },
+      { percentage: 20, amount: 2460950, color: '#f59e0b', category: 'debt', logo: '', amc: '', amcName: '', schemeName: 'Debt Funds', currentMktValue: 2460950, costValue: 2400000, gainLoss: 60950, gainLossPercentage: 2.5, assetType: 'debt' },
+      { percentage: 12, amount: 1476570, color: '#ef4444', category: 'equity', logo: '', amc: '', amcName: '', schemeName: 'Small Cap', currentMktValue: 1476570, costValue: 1200000, gainLoss: 276570, gainLossPercentage: 23.0, assetType: 'equity' },
+      { percentage: 5, amount: 615196, color: '#8b5cf6', category: 'commodity', logo: '', amc: '', amcName: '', schemeName: 'Gold ETF', currentMktValue: 615196, costValue: 600000, gainLoss: 15196, gainLossPercentage: 2.5, assetType: 'commodity' },
+      { percentage: 3, amount: 369018, color: '#06b6d4', category: 'hybrid', logo: '', amc: '', amcName: '', schemeName: 'Hybrid Balanced', currentMktValue: 369018, costValue: 350000, gainLoss: 19018, gainLossPercentage: 5.4, assetType: 'hybrid' },
     ];
   }
 
@@ -218,11 +219,7 @@ const FundDonutChart = () => {
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <img 
-                    src={fund.logo}
-                    alt={`${fund.schemeName} logo`}
-                    className="w-5 h-5 rounded-full shadow-sm"
-                  />
+                  {/* <Logo size="sm" context={fund.category} style={{ backgroundColor: fund.color, color: 'white' }} /> */}
                   <div>
                     <p className="font-medium text-sm" style={{ color: 'var(--color-foreground)' }}>
                       {fund.schemeName}
