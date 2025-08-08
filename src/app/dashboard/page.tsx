@@ -296,7 +296,7 @@ export default function Dashboard() {
                         </h3>
                       </div>
                       <div className="text-right">
-                        <Logo size="md" style={{ backgroundColor: 'var(--color-muted)', color: 'white', opacity:'20' }} />
+                        <Logo size="md" style={{ backgroundColor: 'var(--color-muted)', color: 'white'}} />
                       </div>
                     </div>
 
@@ -365,7 +365,7 @@ export default function Dashboard() {
                         <h3 className="text-xl font-bold">{userData.fullName}</h3>
                       </div>
                       <div className="text-right">
-                        <Logo size="md" style={{ backgroundColor: 'var(--color-muted)', color: 'white' }} />
+                        <Logo size="md" style={{ backgroundColor: 'var(--color-muted)', color: 'white'}} />
                       </div>
                     </div>
 

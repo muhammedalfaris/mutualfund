@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import { usePortfolio, SchemeData } from '@/context/PortfolioContext';
-import Logo from '@/components/Logo';
+// import Logo from '@/components/Logo';
 
 // Define a type for both real and dummy data
 interface FundChartData extends SchemeData {

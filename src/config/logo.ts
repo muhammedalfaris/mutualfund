@@ -1,6 +1,3 @@
-// Logo Configuration
-// Change these values to customize your logo across the entire application
-
 export const logoConfig = {
   // Main logo icon (emoji, text, or image path)
   icon: '💰', // Change this to any emoji, text, or image path like '/logo.png'

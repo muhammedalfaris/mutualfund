@@ -121,7 +121,7 @@ export default function LoginPage() {
                style={{ backgroundColor: 'var(--color-muted)' }} />
           <div className="absolute bottom-32 right-20 w-24 h-24 rounded-full opacity-30 animate-bounce"
                style={{ backgroundColor: 'var(--color-accent)' }} />
-          <div className="absolute top-1/2 left-1/3 w-20 h-20 rounded-full opacity-25 animate-ping"
+          <div className="absolute top-1/2 left-1/3 w-10 h-10 rounded-full opacity-25 animate-ping"
                style={{ backgroundColor: 'var(--color-accent)' }} />
         </div>
 
@@ -132,7 +132,7 @@ export default function LoginPage() {
             </div>
             <h1 className="text-4xl font-bold mb-4">Welcome to {logoConfig.appName}</h1>
             <p className="text-xl opacity-90 max-w-md">
-              Your trusted partner in mutual fund investments. Secure, reliable, and profitable.
+              Your trusted partner in mutual fund investments. Connect and Grow Together.
             </p>
           </div>
           
@@ -142,13 +142,13 @@ export default function LoginPage() {
               <div className="text-sm opacity-80">Assets Managed</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold">50K+</div>
+              <div className="text-3xl font-bold">600+</div>
               <div className="text-sm opacity-80">Happy Investors</div>
             </div>
-            <div className="text-center">
+            {/* <div className="text-center">
               <div className="text-3xl font-bold">15%</div>
               <div className="text-sm opacity-80">Avg. Returns</div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
