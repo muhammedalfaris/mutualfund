@@ -21,9 +21,14 @@ const FundDonutChart = () => {
   // Use real data if available, otherwise fallback to dummy
   let fundData: FundChartData[] = [];
   if (schemes.length > 0) {
-    // Calculate total market value
-    const totalMktValue = schemes.reduce((sum, s) => sum + (s.currentMktValue || 0), 0);
-    fundData = schemes.map((scheme, i) => {
+    // Filter out funds with zero investment and zero current value
+    const filteredSchemes = schemes.filter(scheme => 
+      (scheme.currentMktValue || 0) > 0 || (scheme.costValue || 0) > 0
+    );
+    
+    // Calculate total market value from filtered schemes
+    const totalMktValue = filteredSchemes.reduce((sum, s) => sum + (s.currentMktValue || 0), 0);
+    fundData = filteredSchemes.map((scheme, i) => {
       const colorList = [
         '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#eab308', '#f472b6', '#6366f1', '#14b8a6', '#f43f5e', '#a3e635', '#f87171', '#facc15', '#38bdf8', '#fbbf24', '#a21caf', '#f59e42', '#0ea5e9', '#f43f5e'
       ];
