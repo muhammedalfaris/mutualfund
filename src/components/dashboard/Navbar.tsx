@@ -10,10 +10,10 @@ import Logo from '@/components/Logo';
 const menuItems = [
   { name: 'Dashboard' },
   { name: 'Portfolio' },
-  { name: 'Investments' },
-  { name: 'Transactions' },
-  // { name: 'Analytics' },
-  { name: 'Settings' },
+  // { name: 'Investments' },
+  // { name: 'Transactions' },
+  // // { name: 'Analytics' },
+  // { name: 'Settings' },
 ];
 
 interface NavbarProps {
@@ -134,10 +134,10 @@ const Navbar: React.FC<NavbarProps> = ({ activeMenu = "" }) => {
   const menuRoutes: Record<string, string> = {
     Dashboard: '/dashboard',
     Portfolio: '/portfolio',
-    Investments: '/investments',
-    Transactions: '/transactions',
-    // Analytics: '/analytics',
-    Settings: '/settings',
+    // Investments: '/investments',
+    // Transactions: '/transactions',
+    // // Analytics: '/analytics',
+    // Settings: '/settings',
   };
 
   const handlePortfolioClick = (e: React.MouseEvent) => {

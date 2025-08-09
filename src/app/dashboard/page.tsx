@@ -267,7 +267,7 @@ export default function Dashboard() {
             </p>
           </div>
 
-          <div className="mb-8 flex justify-center">
+          <div className="mb-15 flex justify-center">
             <div className="relative w-full max-w-md">
               <div 
                 className={`relative w-full h-64 cursor-pointer transition-transform duration-700 transform-gpu ${
@@ -405,7 +405,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="mb-8">
+          {/* <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold" style={{ color: 'var(--color-foreground)' }}>
                 Quick Access
@@ -415,7 +415,7 @@ export default function Dashboard() {
               </p>
             </div>
             
-            {/* Desktop Grid Layout */}
+             Desktop Grid Layout 
             <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-4">
               {quickAccessItems.slice(0, 4).map((action) => (
                 <button
@@ -453,7 +453,7 @@ export default function Dashboard() {
               ))}
             </div>
 
-            {/* Mobile Horizontal Scroll Layout */}
+             Mobile Horizontal Scroll Layout 
             <div className="relative md:hidden">
               <div className="overflow-x-auto scrollbar-hide">
                 <div className="flex space-x-4 pb-2" style={{ minWidth: 'fit-content' }}>
@@ -493,14 +493,10 @@ export default function Dashboard() {
                   ))}
                 </div>
               </div>
-              {/* Scroll indicator
-            <div className="absolute top-1/2 right-0 transform -translate-y-1/2 bg-gradient-to-l from-white/80 to-transparent w-8 h-full pointer-events-none md:hidden"
-                 style={{ background: `linear-gradient(to left, var(--color-background) 0%, transparent 100%)` }}>
-            </div> */}
             </div>
-          </div>
+          </div> */}
 
-          <div className="mb-8">
+          <div className="mb-10">
             <FundDonutChart />
           </div>
           <div className="mb-8">

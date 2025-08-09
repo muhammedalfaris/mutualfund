@@ -314,7 +314,7 @@ export default function LoginPage() {
             <span className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>
               Don&apos;t have an account?{' '}
               <Link 
-                href="/register" 
+                href="/signup" 
                 className="font-medium hover:underline transition-all"
                 style={{ color: 'var(--color-primary)' }}
               >

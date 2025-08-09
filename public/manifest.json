@@ -1,7 +1,7 @@
 {
-    "name": "Investment Portal",
-    "short_name": "MF App",
-    "description": "Mutual Fund Investment Portal",
+    "name": "One S Lite",
+    "short_name": "One S Lite",
+    "description": "Mutual Fund Monitor Portal",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#ffffff",
