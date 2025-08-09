@@ -325,11 +325,11 @@ export default function LoginPage() {
         </div>
 
         <div className="mt-12 text-center text-xs" style={{ color: 'var(--color-muted-foreground)' }}>
-          <p>© 2025 MF App. All rights reserved.</p>
+          <p>© Ones S Lite. All rights reserved.</p>
           <div className="mt-2 space-x-4">
-            <Link href="#" className="hover:underline">Privacy Policy</Link>
-            <Link href="#" className="hover:underline">Terms of Service</Link>
-            <Link href="#" className="hover:underline">Support</Link>
+            <Link href="https://mf.ones.money/#/privacypolicy" className="hover:underline">Privacy Policy</Link>
+            <Link href="https://mf.ones.money/#/termsconditions" className="hover:underline">Terms & Conditions</Link>
+            <Link href="tel:+919895204233" className="hover:underline">Support</Link>
           </div>
         </div>
       </div>
