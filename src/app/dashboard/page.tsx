@@ -84,14 +84,14 @@ export default function Dashboard() {
     riskProfile: "Moderate",
   };
 
-  const quickAccessItems = [
-    { name: 'Invest', icon: '💰', color: 'var(--color-success)' },
-    { name: 'Withdraw', icon: '🏦', color: 'var(--color-warning)' },
-    { name: 'Transfer', icon: '🔄', color: 'var(--color-primary)' },
-    { name: 'Reports', icon: '📊', color: 'var(--color-secondary)' },
-    { name: 'History', icon: '📋', color: 'var(--color-accent)' },
-    { name: 'Support', icon: '🎧', color: 'var(--color-info)' },
-  ];
+  // const quickAccessItems = [
+  //   { name: 'Invest', icon: '💰', color: 'var(--color-success)' },
+  //   { name: 'Withdraw', icon: '🏦', color: 'var(--color-warning)' },
+  //   { name: 'Transfer', icon: '🔄', color: 'var(--color-primary)' },
+  //   { name: 'Reports', icon: '📊', color: 'var(--color-secondary)' },
+  //   { name: 'History', icon: '📋', color: 'var(--color-accent)' },
+  //   { name: 'Support', icon: '🎧', color: 'var(--color-info)' },
+  // ];
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-IN', {
