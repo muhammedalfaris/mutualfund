@@ -117,8 +117,6 @@ export default function LoginPage() {
         <div className="absolute inset-0">
           <div className="absolute top-5 left-15 w-32 h-32 rounded-full opacity-20 animate-pulse"
                style={{ backgroundColor: 'var(--color-accent)' }} />
-          {/* <div className="absolute top-44 left-51 w-34 h-34 rounded-full animate-pulse"
-               style={{ backgroundColor: 'var(--color-muted)' }} /> */}
           <div className="absolute bottom-32 right-20 w-24 h-24 rounded-full opacity-30 animate-bounce"
                style={{ backgroundColor: 'var(--color-accent)' }} />
           <div className="absolute top-1/2 left-1/3 w-10 h-10 rounded-full opacity-25 animate-ping"
@@ -127,18 +125,18 @@ export default function LoginPage() {
 
         <div className="relative z-10 flex flex-col justify-center items-center text-center px-12 text-white">
           <div className="mb-8 relative"> 
-          <div className="flex justify-center mb-6">
-            <Logo size="xl" style={{ backgroundColor: 'transparent', color: 'var(--color-primary)' }} />
+            <div className="flex justify-center mb-6">
+              <Logo size="xl" style={{ backgroundColor: 'transparent', color: 'var(--color-primary)' }} />
+            </div>
+            
+            <div className="absolute -top-4 right-39 w-34 h-34 rounded-full animate-pulse -z-10"
+                style={{ backgroundColor: 'var(--color-muted)' }} />
+            
+            <h1 className="text-4xl font-bold mb-4">Welcome to {logoConfig.appName}</h1>
+            <p className="text-xl opacity-90 max-w-md">
+              Your trusted partner in mutual fund investments. Connect and Grow Together.
+            </p>
           </div>
-          
-          <div className="absolute -top-4 right-39 w-34 h-34 rounded-full animate-pulse -z-10"
-              style={{ backgroundColor: 'var(--color-muted)' }} />
-          
-          <h1 className="text-4xl font-bold mb-4">Welcome to {logoConfig.appName}</h1>
-          <p className="text-xl opacity-90 max-w-md">
-            Your trusted partner in mutual fund investments. Connect and Grow Together.
-          </p>
-        </div>
           
           <div className="grid grid-cols-3 gap-8 mt-8">
             <div className="text-center">
